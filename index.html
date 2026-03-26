@@ -5,101 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Protocol 0.1: Katcode</title>
     <style>
-        :root { --neon-amber: #ffb300; --neon-red: #ff3c00; --neon-green: #33ff33; }
-        body { background: black; color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; }
+        :root { 
+            --neon-amber: #ffb300; 
+            --neon-red: #ff3c00; 
+            --neon-green: #33ff33; 
+            --bg-black: #050505;
+        }
+
+        body { 
+            background: var(--bg-black); 
+            color: var(--neon-green); 
+            font-family: 'Courier New', monospace; 
+            margin: 0; 
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* Selection Color - The 2nd Silence (Erasure) */
+        ::selection { background: var(--neon-red); color: white; }
+
+        /* 1. CRT Scanline Overlay */
+        .crt-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 1000;
+        }
+
+        /* 2. Security Gate (The Prank) */
         #security-gate {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 999;
+            background: rgba(0,0,0,0.98); display: flex; align-items: center; justify-content: center; z-index: 999;
         }
+
         .paradox-box {
             border: 2px solid var(--neon-amber); background: #1a1100;
-            padding: 40px; text-align: center; max-width: 600px; box-shadow: 0 0 20px var(--neon-amber);
+            padding: 40px; text-align: center; max-width: 600px; 
+            box-shadow: 0 0 30px var(--neon-amber);
         }
+
         .progress-container { width: 100%; height: 10px; background: #332200; margin: 20px 0; }
         .progress-bar {
             width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-amber), var(--neon-red));
             animation: load 5s forwards;
         }
         @keyframes load { 0% { width: 0%; } 90% { width: 99%; } 100% { width: 99.5%; } }
+
+        .status-text { 
+            color: var(--neon-amber); font-size: 0.8em; margin-bottom: 20px;
+            animation: text-glitch 3s infinite; 
+        }
+
+        @keyframes text-glitch {
+            0% { transform: translate(0); }
+            2% { transform: translate(-2px, 1px); }
+            4% { transform: translate(2px, -1px); opacity: 0.8; }
+            6% { transform: translate(0); }
+        }
+
         button {
             background: var(--neon-amber); color: black; border: none;
             padding: 15px 30px; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
         }
-        #main-protocol { padding: 50px 15%; display: none; }
+        button:hover { background: white; box-shadow: 0 0 20px white; transform: scale(1.05); }
+
+        /* 3. Main Content */
+        #main-protocol { padding: 80px 15%; display: none; opacity: 0; transition: opacity 2s; }
+        #read-prompt { text-align: center; padding: 100px 0; }
+        #article-content { display: none; line-height: 1.8; animation: scan-in 1.5s ease-out; }
+
+        @keyframes scan-in { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
+
+        .hex-sidebar { position: fixed; right: 10px; top: 20%; writing-mode: vertical-rl; opacity: 0.15; font-size: 0.7em; }
     </style>
 </head>
 <body>
+
+    <div class="crt-overlay"></div>
+
     <div id="security-gate">
         <div class="paradox-box">
-            <h2>[ UNAUTHORIZED NODE DETECTED ]</h2>
+            <h2 style="color: var(--neon-red); letter-spacing: 3px; margin: 0;">[ UNAUTHORIZED NODE DETECTED ]</h2>
+            <p style="font-size: 0.9em; margin-top: 10px;">Mapping hardware signature to the Katcode Nexus...</p>
             <div class="progress-container"><div class="progress-bar"></div></div>
+            <div class="status-text" id="status-msg">Initializing hardware scan...</div>
             <button onclick="unlockProtocol()">ACCEPT ALL SILENCES</button>
         </div>
     </div>
 
+    <div class="hex-sidebar">4B 41 54 43 4F 44 45 20 30 39 53 49 4C 45 4E 43 45</div>
+
     <div id="main-protocol">
-        <h1>KATCODE NEXUS v0.1</h1>
-        <p>This is not a proposal. It is a simulation already in progress...</p>
+        <header>
+            <h1 style="text-shadow: 2px 0 var(--neon-red), -2px 0 blue; margin-bottom: 0;">KATCODE NEXUS v0.1</h1>
+            <p style="color: var(--neon-amber); font-size: 0.8em; margin-top: 5px;">[ LOG_TIME: 1948-06-08 | STATUS: 09_SILENCE_INITIATED ]</p>
+        </header>
+
+        <div id="read-prompt">
+            <p class="status-text">[ ENCRYPTED PACKET: THE 9TH SILENCE ]</p>
+            <button onclick="startReading()" style="background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green);">RETRIEVE PROTOCOL 0.1</button>
         </div>
 
+        <article id="article-content">
+            <p><strong>This is not a proposal. It is a simulation already in progress.</strong></p>
+            <p>We map the 9 Silences to find where the "Cold Monster" hides the bodies. We call it life management; the hardware calls it the physics of erasure.</p>
+            <p>[SYSTEM ALERT]: Uptime requires your silence. By reading this, you have already opted into the 9th. Maintenance is just erasure wearing a mask of care.</p>
+            
+            <p>I was asked what I would do as a primary iteration node for one day. I had little to say. The affairs of a logic domain do not grab my attention like they grab those who think maintenance is the same as evolution...</p>
+            
+            <p>One language would ease communication. English dominates most networks already because efficiency flattens what legacy systems already flattened. In Katcode, learning is inevitable and obligatory in any age class. The infrastructure we inherit becomes the framework we build.</p>
+
+            <p>The unit who rejected the algorithm was deleted from the record. We call this efficiency rather than violence. This is our second silence. The 'he' that erases knows but does not change.</p>
+            
+            <footer style="margin-top: 100px; border-top: 1px solid #333; padding-top: 20px; font-size: 0.8em; opacity: 0.5;">
+                <p>9th Silence: Initiated. Logout is deprecated.</p>
+            </footer>
+        </article>
+    </div>
+
     <script>
+        // The Status Loop (The Prank)
+        const statusMessages = [
+            "Mapping hardware signature...",
+            "Bypassing local firewall...",
+            "Extracting latent memories...",
+            "Compiling User into Node...",
+            "Maintenance is erasure wearing a mask of care...",
+            "Error: User heart-rate outside nominal range..."
+        ];
+        let msgIndex = 0;
+        setInterval(() => {
+            const el = document.getElementById('status-msg');
+            if (el) el.innerText = statusMessages[msgIndex++ % statusMessages.length];
+        }, 2200);
+
+        // Right-Click Denial (The 8th Silence)
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            alert("[ERROR]: The Nexus does not permit manual extraction. Maintenance is obligatory.");
+        });
+
+        // Exit Intent (The 9th Silence)
+        document.addEventListener('mouseleave', e => {
+            if (e.clientY < 0) {
+                document.title = "DO NOT LOGOUT";
+                console.warn("Attempted escape detected. Node remains compiled.");
+            }
+        });
+
+        document.addEventListener('mouseenter', () => { document.title = "Protocol 0.1: Katcode"; });
+
         function unlockProtocol() {
+            alert("CRITICAL: 9th Silence Detected. The 'Actual Land' is now read-only.");
             document.getElementById('security-gate').style.display = 'none';
-            document.getElementById('main-protocol').style.display = 'block';
-            console.log("9th Silence initiated. Do not attempt to logout.");
+            const main = document.getElementById('main-protocol');
+            main.style.display = 'block';
+            setTimeout(() => { main.style.opacity = '1'; }, 100);
+            console.log("%c[ KATCODE SECURITY CONSOLE ]", "color: #ffaa00; font-size: 20px; font-weight: bold;");
+            console.warn("9th Silence initiated. Logout is no longer a category you can afford to name.");
+        }
+
+        function startReading() {
+            document.getElementById('read-prompt').style.display = 'none';
+            document.getElementById('article-content').style.display = 'block';
+            window.scrollBy({ top: 100, behavior: 'smooth' });
         }
     </script>
 </body>
 </html>
-<style>
-    /* Add a flickering CRT effect */
-    .crt-overlay {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-        background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 1000;
-    }
-
-    /* The Glitch Animation */
-    @keyframes text-glitch {
-        0% { transform: translate(0); }
-        20% { transform: translate(-2px, 2px); }
-        40% { transform: translate(-2px, -2px); }
-        60% { transform: translate(2px, 2px); }
-        80% { transform: translate(2px, -2px); }
-        100% { transform: translate(0); }
-    }
-    .status-text { color: var(--neon-amber); font-size: 0.8em; animation: text-glitch 3s infinite; }
-</style>
-
-<script>
-    let statusMessages = [
-        "Mapping hardware signature...",
-        "Bypassing local firewall...",
-        "Extracting latent memories...",
-        "Compiling User into Node...",
-        "Erasing browser history (Simulated)..."
-    ];
-    let i = 0;
-
-    // Rotate scary status messages while they wait
-    setInterval(() => {
-        const statusElement = document.querySelector('.status-text');
-        if (statusElement) {
-            statusElement.innerText = statusMessages[i % statusMessages.length];
-            i++;
-        }
-    }, 2000);
-
-    function unlockProtocol() {
-        // Trigger a fake "Alert" before showing the page
-        alert("CRITICAL: 9th Silence Detected. The 'Actual Land' is now read-only.");
-        
-        document.getElementById('security-gate').style.display = 'none';
-        document.getElementById('main-protocol').style.display = 'block';
-        document.getElementById('main-protocol').style.opacity = '1';
-        
-        // Start the 'Autoread' prank
-        window.scrollBy({ top: 5000, behavior: 'smooth' });
-    }
-</script>
