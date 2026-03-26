@@ -51,3 +51,55 @@
     </script>
 </body>
 </html>
+<style>
+    /* Add a flickering CRT effect */
+    .crt-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 1000;
+    }
+
+    /* The Glitch Animation */
+    @keyframes text-glitch {
+        0% { transform: translate(0); }
+        20% { transform: translate(-2px, 2px); }
+        40% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+        100% { transform: translate(0); }
+    }
+    .status-text { color: var(--neon-amber); font-size: 0.8em; animation: text-glitch 3s infinite; }
+</style>
+
+<script>
+    let statusMessages = [
+        "Mapping hardware signature...",
+        "Bypassing local firewall...",
+        "Extracting latent memories...",
+        "Compiling User into Node...",
+        "Erasing browser history (Simulated)..."
+    ];
+    let i = 0;
+
+    // Rotate scary status messages while they wait
+    setInterval(() => {
+        const statusElement = document.querySelector('.status-text');
+        if (statusElement) {
+            statusElement.innerText = statusMessages[i % statusMessages.length];
+            i++;
+        }
+    }, 2000);
+
+    function unlockProtocol() {
+        // Trigger a fake "Alert" before showing the page
+        alert("CRITICAL: 9th Silence Detected. The 'Actual Land' is now read-only.");
+        
+        document.getElementById('security-gate').style.display = 'none';
+        document.getElementById('main-protocol').style.display = 'block';
+        document.getElementById('main-protocol').style.opacity = '1';
+        
+        // Start the 'Autoread' prank
+        window.scrollBy({ top: 5000, behavior: 'smooth' });
+    }
+</script>
