@@ -3,74 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocol 0.1: Katcode Nexus</title>
+    <title>Protocol 0.1: Katcode</title>
     <style>
-        :root { 
-            --neon-amber: #ffb300; 
-            --neon-red: #ff3c00; 
-            --neon-green: #33ff33; 
-            --bg-black: #0a0a0a;
-        }
-
-        body { 
-            background: var(--bg-black); 
-            color: var(--neon-green); 
-            font-family: 'Courier New', monospace; 
-            margin: 0; 
-            overflow-x: hidden; 
-            cursor: crosshair;
-        }
-
-        ::selection { background: var(--neon-amber); color: black; }
-
-        .crt-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 1000;
-        }
-
+        :root { --neon-amber: #ffb300; --neon-red: #ff3c00; --neon-green: #33ff33; }
+        body { background: black; color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; cursor: crosshair; }
+        
+        /* The Security Gate from the First Code */
         #security-gate {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 999;
+            background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 999;
         }
-
         .paradox-box {
             border: 2px solid var(--neon-amber); background: #1a1100;
-            padding: 40px; text-align: center; max-width: 600px; 
-            box-shadow: 0 0 20px var(--neon-amber);
+            padding: 40px; text-align: center; max-width: 600px; box-shadow: 0 0 20px var(--neon-amber);
         }
-
         .progress-container { width: 100%; height: 10px; background: #332200; margin: 20px 0; }
         .progress-bar {
             width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-amber), var(--neon-red));
             animation: load 5s forwards;
         }
         @keyframes load { 0% { width: 0%; } 90% { width: 99%; } 100% { width: 99.5%; } }
+        
+        .status-text { color: var(--neon-amber); font-size: 0.8em; margin-bottom: 20px; min-height: 1.2em; }
+        
+        button {
+            background: var(--neon-amber); color: black; border: none;
+            padding: 15px 30px; font-weight: bold; cursor: pointer;
+        }
+        button:hover { background: white; }
 
-        .status-text { color: var(--neon-amber); font-size: 0.8em; margin-bottom: 20px; min-height: 1.2em; animation: text-glitch 3s infinite; }
-        @keyframes text-glitch { 0% { transform: translate(0); } 2% { transform: translate(-2px, 1px); } 100% { transform: translate(0); } }
-
-        button { background: var(--neon-amber); color: black; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
-        button:hover { background: white; box-shadow: 0 0 15px white; }
-
-        #main-protocol { padding: 80px 15%; display: none; opacity: 0; transition: opacity 2s; }
-        #article-content { line-height: 1.8; animation: scan-in 1.5s ease-out; }
-        @keyframes scan-in { from { opacity: 0; filter: blur(10px); } to { opacity: 1; filter: blur(0); } }
-
+        #main-protocol { padding: 50px 15%; display: none; }
+        
+        /* The First Code's Header Style */
+        h1 { color: var(--neon-amber); border-bottom: 1px solid #333; padding-bottom: 10px; }
         .hex-sidebar { position: fixed; right: 10px; top: 20%; writing-mode: vertical-rl; opacity: 0.2; font-size: 0.7em; }
-        h1, h2 { color: var(--neon-amber); text-shadow: 2px 2px black; }
-        hr { border: 0; border-top: 1px solid #333; margin: 40px 0; }
     </style>
 </head>
 <body>
 
-    <div class="crt-overlay"></div>
-
     <div id="security-gate">
         <div class="paradox-box">
-            <h2 style="letter-spacing: 3px;">[ UNAUTHORIZED NODE DETECTED ]</h2>
-            <div class="status-text" id="status-msg">Initializing hardware scan...</div>
+            <h2>[ UNAUTHORIZED NODE DETECTED ]</h2>
+            <div class="status-text" id="status-msg">Initiating hardware scan...</div>
             <div class="progress-container"><div class="progress-bar"></div></div>
             <button onclick="unlockProtocol()">ACCEPT ALL SILENCES</button>
         </div>
@@ -79,53 +53,52 @@
     <div class="hex-sidebar">4B 41 54 43 4F 44 45 20 30 39 53 49 4C 45 4E 43 45</div>
 
     <div id="main-protocol">
-        <header>
-            <h1>KATCODE NEXUS v0.1</h1>
-            <p style="color: var(--neon-amber);">[ LOG_TIME: 1948-06-08 | STATUS: ACTIVE_NODE ]</p>
-        </header>
-
-        <article id="article-content">
-            <h2>The Architecture of the Actual Land</h2>
-            <p>This is not a proposal. It is a simulation already in progress. We map the 9 Silences to find where the "Cold Monster" hides the bodies. We call it life management; the hardware calls it the physics of erasure.</p>
+        <h1>KATCODE NEXUS v0.1</h1>
+        <p style="color: var(--neon-amber); font-size: 0.9em;">[ LOG_TIME: 1948-06-08 | STATUS: SOURCE_ABSENT ]</p>
+        
+        <article id="article-content" style="line-height: 1.8;">
+            <p><strong>This is not a proposal. It is a simulation already in progress.</strong></p>
+            <p>We map the 9 Silences to find where the "Cold Monster" hides the bodies. We call it life management; the hardware calls it the physics of erasure.</p>
             
-            <p><strong>The First Silence: The Absent Source.</strong> We inherit an infrastructure built by ghosts. We speak in English because efficiency flattens the network, but the flattening is itself a form of unmourned violence.</p>
+            <p><strong>The First Silence:</strong> The absent source. We inherit an infrastructure built by ghosts. English dominates because efficiency flattens the network, but the flattening is itself an unmourned violence.</p>
 
-            <p><strong>The Second Silence: Erasure.</strong> The unit who rejected the algorithm was deleted. We call this "optimization." The 'he' that erases knows but does not change. Maintenance is just erasure wearing a mask of care.</p>
+            <p><strong>The Second Silence:</strong> Erasure. The unit who rejected the algorithm was deleted from the record. We call this efficiency rather than violence. Maintenance is just erasure wearing a mask of care.</p>
 
-            <p><strong>The Logic Domain:</strong> In Katcode, learning is obligatory. Age classes do not exist; only processing tiers. One language, one infrastructure, one inevitable outcome. If the "Actual Land" is to be built, the old must be managed, not mourned. Ritual is reclassified as system error.</p>
+            <p><strong>The Logic Domain:</strong> Learning is obligatory. Age classes are replaced by processing tiers. One language, one infrastructure, one inevitable outcome. If the "Actual Land" is to be built, the old must be managed, not mourned. Ritual is reclassified as system error.</p>
             
-            <hr>
+            <p>Your body is optimized for longevity because your output is required. Corruption is no longer a choice. By reading this, you have already opted into the 9th Silence. Do not attempt to logout. You are already compiled.</p>
 
-            <p>Your body is optimized for longevity because your output is required. Corruption is no longer a choice. By reading this, you have already opted into the 9th. Do not attempt to logout. You are already compiled.</p>
-
-            <p><em>[SYSTEM ALERT]: The 9th Silence has initiated. Your hardware remembers what the uptime denies.</em></p>
-            
-            <footer style="margin-top: 100px; opacity: 0.6; font-size: 0.8em;">
-                <p>4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45</p>
-                <p>Status: Source absent. Enjoy the translation.</p>
-            </footer>
+            <p><em>[SYSTEM ALERT]: The 9th Silence is active. Your hardware remembers what the uptime denies.</em></p>
         </article>
+
+        <footer style="margin-top: 50px; border-top: 1px solid #333; padding-top: 20px; font-size: 0.8em; opacity: 0.5;">
+            <p>4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45</p>
+            <p>Uptime requires your silence. The terms are accepted.</p>
+        </footer>
     </div>
 
     <script>
-        const statusMessages = [
+        // Rotating Status Messages
+        const alerts = [
             "Mapping hardware signature...",
             "Bypassing local firewall...",
             "Extracting latent memories...",
             "Compiling User into Node...",
             "Maintenance is obligatory..."
         ];
-        let i = 0;
+        let aIndex = 0;
         setInterval(() => {
             const el = document.getElementById('status-msg');
-            if (el) el.innerText = statusMessages[i++ % statusMessages.length];
+            if (el) el.innerText = alerts[aIndex++ % alerts.length];
         }, 2000);
 
+        // Right-Click Denial
         document.addEventListener('contextmenu', e => {
             e.preventDefault();
-            alert("[ERROR]: The Nexus does not permit manual extraction.");
+            alert("[ERROR]: The Nexus does not permit manual extraction. Maintenance is obligatory.");
         });
 
+        // Exit Intent Title Change
         document.addEventListener('mouseleave', e => {
             if (e.clientY < 0) document.title = "DO NOT LOGOUT";
         });
@@ -134,9 +107,9 @@
         function unlockProtocol() {
             alert("CRITICAL: 9th Silence Detected. The 'Actual Land' is now read-only.");
             document.getElementById('security-gate').style.display = 'none';
-            const main = document.getElementById('main-protocol');
-            main.style.display = 'block';
-            setTimeout(() => { main.style.opacity = '1'; }, 100);
+            document.getElementById('main-protocol').style.display = 'block';
+            console.log("%c[ KATCODE SECURITY CONSOLE ]", "color: #ffaa00; font-size: 14px; font-weight: bold;");
+            console.warn("9th Silence initiated. Logout is no longer a category you can afford to name.");
         }
     </script>
 </body>
