@@ -8,74 +8,68 @@
         :root { --neon-amber: #ffb300; --neon-red: #ff3c00; --neon-green: #33ff33; }
         body { background: black; color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; cursor: crosshair; }
         
-        /* Security Gate & Choice Matrix */
         #security-gate, #choice-matrix {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.98); display: flex; align-items: center; justify-content: center; z-index: 999;
         }
 
         .paradox-box {
-            border: 2px solid var(--neon-amber); background: #1a1100;
-            padding: 40px; text-align: center; max-width: 600px; width: 85%; box-shadow: 0 0 20px var(--neon-amber);
+            border: 1px solid #333; background: #0a0a0a;
+            padding: 40px; text-align: left; max-width: 500px; width: 85%;
+            box-shadow: 0 10px 30px rgba(0,0,0,1);
         }
 
-        /* Choice Buttons */
         .choice-btn {
-            display: block; width: 100%; padding: 15px; margin: 10px 0;
-            background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green);
-            cursor: pointer; font-family: 'Courier New', monospace; text-align: left; transition: 0.2s;
+            display: block; width: 100%; padding: 12px; margin: 8px 0;
+            background: #111; color: var(--neon-green); border: 1px solid #333;
+            cursor: pointer; font-family: 'Courier New', monospace; font-size: 0.8em;
         }
-        .choice-btn:hover { background: var(--neon-green); color: black; }
+        .choice-btn:hover { border-color: var(--neon-green); background: #001100; }
 
-        /* The 5th Silence: The Fleeing Button */
         #phantom-btn {
-            position: fixed; width: auto; min-width: 140px;
-            border: 1px solid var(--neon-red); color: var(--neon-red);
-            padding: 10px; font-size: 0.7em; background: black;
-            cursor: pointer; z-index: 1001; top: 20px; left: 20px;
+            position: fixed; width: auto; border: 1px solid #444; color: #666;
+            padding: 8px 15px; font-size: 0.7em; background: black;
+            cursor: pointer; z-index: 1001; top: 10px; left: 10px; display: none;
         }
 
-        .progress-container { width: 100%; height: 10px; background: #332200; margin: 20px 0; }
+        .progress-container { width: 100%; height: 2px; background: #222; margin: 20px 0; }
         .progress-bar {
-            width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-amber), var(--neon-red));
-            animation: load 5s forwards;
+            width: 0%; height: 100%; background: var(--neon-amber);
+            animation: load 6s forwards;
         }
-        @keyframes load { 0% { width: 0%; } 90% { width: 99%; } 100% { width: 99.5%; } }
+        @keyframes load { 0% { width: 0%; } 100% { width: 99.5%; } }
         
-        #main-protocol { padding: 50px 15%; display: none; }
+        #main-protocol { padding: 60px 15%; display: none; max-width: 800px; margin: auto; }
         
-        /* Content Styling */
-        h1, h2 { color: var(--neon-amber); border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .summary-box { border: 1px solid #222; padding: 20px; background: #050505; margin: 30px 0; font-size: 0.9em; border-left: 4px solid var(--neon-amber); }
-        .poem-section { font-style: italic; color: #888; border-left: 3px solid var(--neon-red); padding-left: 20px; margin: 40px 0; }
-        .hex-sidebar { position: fixed; right: 10px; top: 20%; writing-mode: vertical-rl; opacity: 0.2; font-size: 0.7em; }
+        h1 { color: var(--neon-amber); font-size: 1.2em; letter-spacing: 2px; text-transform: uppercase; }
+        .label { color: #555; font-size: 0.7em; font-weight: bold; margin-right: 10px; }
+        .summary-box { border: 1px solid #222; padding: 20px; margin: 30px 0; font-size: 0.85em; color: #aaa; line-height: 1.6; }
+        .poem-section { color: #777; border-left: 1px solid var(--neon-red); padding-left: 20px; margin: 40px 0; font-style: italic; }
+        .hex-sidebar { position: fixed; right: 10px; top: 20%; writing-mode: vertical-rl; opacity: 0.1; font-size: 0.65em; }
 
-        /* Mobile Optimization */
         @media (max-width: 600px) {
-            #main-protocol { padding: 40px 5%; }
-            .paradox-box { padding: 20px; }
+            #main-protocol { padding: 40px 8%; }
+            .paradox-box { padding: 25px; }
             .hex-sidebar { display: none; }
-            h1 { font-size: 1.4em; }
         }
     </style>
 </head>
 <body>
 
-    <button id="phantom-btn" style="display:none;" onmouseover="flee()" ontouchstart="flee()">[ 5TH_SILENCE: EXIT ]</button>
+    <button id="phantom-btn" onmouseover="flee()" ontouchstart="flee()">[ 5TH_SILENCE: EXIT ]</button>
 
     <div id="security-gate">
         <div class="paradox-box">
-            <h2>[ UNAUTHORIZED NODE DETECTED ]</h2>
-            <div id="status-msg" style="color: var(--neon-amber); font-size: 0.8em; min-height:1.2em;">Initiating hardware scan...</div>
+            <p><span class="label">[STATUS]</span> <span id="status-msg">initiating hardware scan...</span></p>
             <div class="progress-container"><div class="progress-bar"></div></div>
-            <button style="background: var(--neon-amber); border:none; padding:15px; font-weight:bold; cursor:pointer;" onclick="startChoice()">ACCEPT ALL SILENCES</button>
+            <button style="background:none; border: 1px solid var(--neon-amber); color: var(--neon-amber); padding: 10px 20px; cursor:pointer; font-size: 0.7em;" onclick="startChoice()">ACCEPT ALL SILENCES</button>
         </div>
     </div>
 
     <div id="choice-matrix" style="display: none;">
         <div class="paradox-box">
-            <h3 id="question-title" style="color: var(--neon-amber);">DIAGNOSTIC 01</h3>
-            <p id="question-text">A unit in your tier is failing. Do you:</p>
+            <p id="question-title" style="color: #555; font-size: 0.7em; font-weight: bold;">[DIAGNOSTIC_01]</p>
+            <p id="question-text" style="font-size: 0.9em; margin: 15px 0;">loading data packets...</p>
             <div id="options-container"></div>
         </div>
     </div>
@@ -83,43 +77,43 @@
     <div class="hex-sidebar">4B 41 54 43 4F 44 45 20 30 39 53 49 4C 45 4E 43 45</div>
 
     <div id="main-protocol">
-        <h1>KATCODE NEXUS v0.1</h1>
-        <p style="color: var(--neon-amber); font-size: 0.8em;">[ LOG_TIME: 1948-06-08 | STATUS: COMPILED ]</p>
+        <h1>KATCODE NEXUS</h1>
+        <p style="font-size: 0.7em; color: #444;"><span class="label">[LOG_TIME]</span> 1948-06-08_09:00:00_EET</p>
         
         <div class="summary-box">
-            <strong>[NODE_STATUS]: <span id="user-tier" style="color: var(--neon-red);">PROCESSED</span></strong><br>
-            Simulation log: Your choices have been recorded. You are now compiled into the Actual Land.
+            <span class="label">[NODE_STATUS]</span> <span id="user-tier" style="color: var(--neon-red);">processed</span><br><br>
+            this is not a proposal. it is a simulation already in progress. we map the 9 silences to find where the "cold monster" hides the bodies.
         </div>
 
         <section class="poem-section">
-            <p>“We map the 9 Silences to find where the Cold Monster hides the bodies.”</p>
-            <p>“We call it life management; the hardware calls it the physics of erasure.”</p>
+            <p>maintenance is just erasure wearing a mask of care.</p>
+            <p>uptime requires your silence.</p>
         </section>
 
-        <article id="article-content" style="line-height: 1.8;">
-            <h2>The Protocol</h2>
-            <p>Maintenance is the only evolution. English flattens the network. The old are managed. Mourning is a system error. By reading this, you are already processed. The 9th Silence is your read-only reality.</p>
+        <article style="font-size: 0.9em; line-height: 1.8; color: #888;">
+            <p><span class="label">[NOTICE]</span> by reading this, you have already opted into the 9th.</p>
+            <p><span class="label">[LIABILITY]</span> the system is irresponsible for the result of your compilation. the terms were accepted upon observation. access was not recommended.</p>
         </article>
         
-        <footer style="margin-top: 50px; border-top: 1px solid #333; padding-top: 20px; font-size: 0.7em; opacity: 0.4;">
-            <p>4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45</p>
+        <footer style="margin-top: 80px; border-top: 1px solid #111; padding-top: 20px; font-size: 0.6em; color: #333;">
+            4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45 // BIOPOWER
         </footer>
     </div>
 
     <script>
         const gameData = [
             {
-                q: "The infrastructure is built by ghosts. Do you:",
+                q: "the unit has failed its quota. do you:",
                 options: [
-                    { t: "Polish the gears for efficiency.", val: "MAINTAINER" },
-                    { t: "Listen for the lock turning.", val: "OBSERVER" }
+                    { t: "initiate maintenance (erasure).", val: "optimizer" },
+                    { t: "attempt to recall its name.", val: "errant_node" }
                 ]
             },
             {
-                q: "A ritual is detected in your sector. Do you:",
+                q: "the infrastructure is built by ghosts. do you:",
                 options: [
-                    { t: "Report as a System Error.", val: "OPTIMIZER" },
-                    { t: "Submit to the 9th Silence.", val: "NODE" }
+                    { t: "polish the gears for efficiency.", val: "maintainer" },
+                    { t: "listen for the lock turning.", val: "observer" }
                 ]
             }
         ];
@@ -136,7 +130,7 @@
 
         function renderQuestion() {
             const data = gameData[currentStep];
-            document.getElementById('question-title').innerText = "DIAGNOSTIC 0" + (currentStep + 1);
+            document.getElementById('question-title').innerText = "[DIAGNOSTIC_0" + (currentStep + 1) + "]";
             document.getElementById('question-text').innerText = data.q;
             const container = document.getElementById('options-container');
             container.innerHTML = '';
@@ -152,11 +146,8 @@
         function selectOption(val) {
             results.push(val);
             currentStep++;
-            if (currentStep < gameData.length) {
-                renderQuestion();
-            } else {
-                finishGame();
-            }
+            if (currentStep < gameData.length) renderQuestion();
+            else finishGame();
         }
 
         function finishGame() {
@@ -164,7 +155,6 @@
             document.getElementById('phantom-btn').style.display = 'none';
             document.getElementById('main-protocol').style.display = 'block';
             document.getElementById('user-tier').innerText = results.join(" / ");
-            alert("NODE CLASSIFIED. WELCOME TO THE ACTUAL LAND.");
         }
 
         function flee() {
@@ -173,18 +163,18 @@
             const y = Math.random() * (window.innerHeight - 50);
             btn.style.left = x + 'px';
             btn.style.top = y + 'px';
-            if (navigator.vibrate) navigator.vibrate(40);
+            if (navigator.vibrate) navigator.vibrate(30);
         }
 
-        const alerts = ["Mapping hardware...", "Extracting memories...", "Compiling Node...", "Maintenance is obligatory..."];
+        const alerts = ["mapping hardware...", "extracting memories...", "compiling node...", "erasure in progress..."];
         let aIndex = 0;
         setInterval(() => {
             const el = document.getElementById('status-msg');
             if (el) el.innerText = alerts[aIndex++ % alerts.length];
-        }, 2200);
+        }, 2500);
 
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('mouseleave', () => document.title = "DO NOT LOGOUT");
+        document.addEventListener('mouseleave', () => document.title = "do not logout");
         document.addEventListener('mouseenter', () => document.title = "Protocol 0.1: Katcode");
     </script>
 </body>
