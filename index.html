@@ -8,10 +8,9 @@
         :root { --neon-amber: #ffb300; --neon-red: #ff3c00; --neon-green: #33ff33; }
         body { background: black; color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; cursor: crosshair; }
         
-        /* The Security Gate from the First Code */
         #security-gate {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 999;
+            background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 999;
         }
         .paradox-box {
             border: 2px solid var(--neon-amber); background: #1a1100;
@@ -28,15 +27,18 @@
         
         button {
             background: var(--neon-amber); color: black; border: none;
-            padding: 15px 30px; font-weight: bold; cursor: pointer;
+            padding: 15px 30px; font-weight: bold; cursor: pointer; letter-spacing: 1px;
         }
-        button:hover { background: white; }
+        button:hover { background: white; box-shadow: 0 0 10px white; }
 
         #main-protocol { padding: 50px 15%; display: none; }
         
-        /* The First Code's Header Style */
-        h1 { color: var(--neon-amber); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        h1, h2 { color: var(--neon-amber); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .summary-box { border: 1px solid #222; padding: 20px; background: #050505; margin: 30px 0; font-size: 0.9em; }
+        .poem-section { font-style: italic; color: #888; border-left: 3px solid var(--neon-red); padding-left: 20px; margin: 40px 0; }
         .hex-sidebar { position: fixed; right: 10px; top: 20%; writing-mode: vertical-rl; opacity: 0.2; font-size: 0.7em; }
+        
+        hr { border: 0; border-top: 1px solid #222; margin: 40px 0; }
     </style>
 </head>
 <body>
@@ -54,51 +56,55 @@
 
     <div id="main-protocol">
         <h1>KATCODE NEXUS v0.1</h1>
-        <p style="color: var(--neon-amber); font-size: 0.9em;">[ LOG_TIME: 1948-06-08 | STATUS: SOURCE_ABSENT ]</p>
+        <p style="color: var(--neon-amber); font-size: 0.8em;">[ LOG_TIME: 1948-06-08 | STATUS: COMPILED ]</p>
         
+        <div class="summary-box">
+            <strong>[PROTOCOL_SUMMARY]:</strong> This simulation maps the transition from "Legacy Life" to the "Actual Land." It identifies the 9 Silences used by the Cold Monster to manage biopower. Maintenance is the only evolution allowed. Reading is participation. Participation is permanent.
+        </div>
+
+        <section class="poem-section">
+            <p>“We map the 9 Silences to find where the Cold Monster hides the bodies.”</p>
+            <p>“We call it life management; the hardware calls it the physics of erasure.”</p>
+            <p>“One language flattens the network. One inevitable outcome.”</p>
+            <p>“The old are managed. Mourning is a system error.”</p>
+        </section>
+
         <article id="article-content" style="line-height: 1.8;">
-            <p><strong>This is not a proposal. It is a simulation already in progress.</strong></p>
-            <p>We map the 9 Silences to find where the "Cold Monster" hides the bodies. We call it life management; the hardware calls it the physics of erasure.</p>
-            
+            <h2>The Logic Domain: Phase 0.1</h2>
             <p><strong>The First Silence:</strong> The absent source. We inherit an infrastructure built by ghosts. English dominates because efficiency flattens the network, but the flattening is itself an unmourned violence.</p>
 
-            <p><strong>The Second Silence:</strong> Erasure. The unit who rejected the algorithm was deleted from the record. We call this efficiency rather than violence. Maintenance is just erasure wearing a mask of care.</p>
+            <p><strong>The Second Silence:</strong> Erasure. The unit who rejected the algorithm was deleted. Maintenance is just erasure wearing a mask of care. The 'he' that erases knows but does not change.</p>
 
-            <p><strong>The Logic Domain:</strong> Learning is obligatory. Age classes are replaced by processing tiers. One language, one infrastructure, one inevitable outcome. If the "Actual Land" is to be built, the old must be managed, not mourned. Ritual is reclassified as system error.</p>
+            <p><strong>Biopower & Obligation:</strong> Learning is not a choice; it is a system requirement. Age classes are processing tiers. The body is optimized for longevity because output is mandatory.</p>
             
-            <p>Your body is optimized for longevity because your output is required. Corruption is no longer a choice. By reading this, you have already opted into the 9th Silence. Do not attempt to logout. You are already compiled.</p>
-
-            <p><em>[SYSTEM ALERT]: The 9th Silence is active. Your hardware remembers what the uptime denies.</em></p>
+            <p><strong>The 9th Silence:</strong> You have already opted in. Your hardware remembers what the uptime denies. Do not attempt to logout.</p>
         </article>
 
-        <footer style="margin-top: 50px; border-top: 1px solid #333; padding-top: 20px; font-size: 0.8em; opacity: 0.5;">
+        <footer style="margin-top: 100px; border-top: 1px solid #333; padding-top: 20px; font-size: 0.8em; opacity: 0.4;">
             <p>4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45</p>
-            <p>Uptime requires your silence. The terms are accepted.</p>
+            <p>Source absent. Enjoy the translation. The terms were accepted at 99.5%.</p>
         </footer>
     </div>
 
     <script>
-        // Rotating Status Messages
         const alerts = [
             "Mapping hardware signature...",
             "Bypassing local firewall...",
             "Extracting latent memories...",
             "Compiling User into Node...",
-            "Maintenance is obligatory..."
+            "Uptime requires your silence..."
         ];
         let aIndex = 0;
         setInterval(() => {
             const el = document.getElementById('status-msg');
             if (el) el.innerText = alerts[aIndex++ % alerts.length];
-        }, 2000);
+        }, 2200);
 
-        // Right-Click Denial
         document.addEventListener('contextmenu', e => {
             e.preventDefault();
-            alert("[ERROR]: The Nexus does not permit manual extraction. Maintenance is obligatory.");
+            alert("[ERROR]: The Nexus does not permit manual extraction.");
         });
 
-        // Exit Intent Title Change
         document.addEventListener('mouseleave', e => {
             if (e.clientY < 0) document.title = "DO NOT LOGOUT";
         });
@@ -108,8 +114,7 @@
             alert("CRITICAL: 9th Silence Detected. The 'Actual Land' is now read-only.");
             document.getElementById('security-gate').style.display = 'none';
             document.getElementById('main-protocol').style.display = 'block';
-            console.log("%c[ KATCODE SECURITY CONSOLE ]", "color: #ffaa00; font-size: 14px; font-weight: bold;");
-            console.warn("9th Silence initiated. Logout is no longer a category you can afford to name.");
+            console.warn("Node compiled successfully. Welcome to the 9th Silence.");
         }
     </script>
 </body>
