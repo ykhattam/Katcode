@@ -8,6 +8,7 @@
         :root { --neon-amber: #ffb300; --neon-red: #ff3c00; --neon-green: #33ff33; }
         body { background: black; color: var(--neon-green); font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; cursor: crosshair; }
         
+        /* Security Gate & Choice Matrix */
         #security-gate, #choice-matrix {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.98); display: flex; align-items: center; justify-content: center; z-index: 999;
@@ -15,9 +16,10 @@
 
         .paradox-box {
             border: 2px solid var(--neon-amber); background: #1a1100;
-            padding: 40px; text-align: center; max-width: 600px; min-width: 400px; box-shadow: 0 0 20px var(--neon-amber);
+            padding: 40px; text-align: center; max-width: 600px; width: 85%; box-shadow: 0 0 20px var(--neon-amber);
         }
 
+        /* Choice Buttons */
         .choice-btn {
             display: block; width: 100%; padding: 15px; margin: 10px 0;
             background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green);
@@ -27,10 +29,10 @@
 
         /* The 5th Silence: The Fleeing Button */
         #phantom-btn {
-            position: absolute; width: auto; min-width: 150px;
+            position: fixed; width: auto; min-width: 140px;
             border: 1px solid var(--neon-red); color: var(--neon-red);
-            padding: 10px; font-size: 0.8em; pointer-events: auto;
-            transition: all 0.1s ease; z-index: 1001;
+            padding: 10px; font-size: 0.7em; background: black;
+            cursor: pointer; z-index: 1001; top: 20px; left: 20px;
         }
 
         .progress-container { width: 100%; height: 10px; background: #332200; margin: 20px 0; }
@@ -41,27 +43,39 @@
         @keyframes load { 0% { width: 0%; } 90% { width: 99%; } 100% { width: 99.5%; } }
         
         #main-protocol { padding: 50px 15%; display: none; }
+        
+        /* Content Styling */
+        h1, h2 { color: var(--neon-amber); border-bottom: 1px solid #333; padding-bottom: 10px; }
         .summary-box { border: 1px solid #222; padding: 20px; background: #050505; margin: 30px 0; font-size: 0.9em; border-left: 4px solid var(--neon-amber); }
         .poem-section { font-style: italic; color: #888; border-left: 3px solid var(--neon-red); padding-left: 20px; margin: 40px 0; }
         .hex-sidebar { position: fixed; right: 10px; top: 20%; writing-mode: vertical-rl; opacity: 0.2; font-size: 0.7em; }
+
+        /* Mobile Optimization */
+        @media (max-width: 600px) {
+            #main-protocol { padding: 40px 5%; }
+            .paradox-box { padding: 20px; }
+            .hex-sidebar { display: none; }
+            h1 { font-size: 1.4em; }
+        }
     </style>
 </head>
 <body>
 
+    <button id="phantom-btn" style="display:none;" onmouseover="flee()" ontouchstart="flee()">[ 5TH_SILENCE: EXIT ]</button>
+
     <div id="security-gate">
         <div class="paradox-box">
             <h2>[ UNAUTHORIZED NODE DETECTED ]</h2>
-            <div id="status-msg" style="color: var(--neon-amber); font-size: 0.8em;">Initiating hardware scan...</div>
+            <div id="status-msg" style="color: var(--neon-amber); font-size: 0.8em; min-height:1.2em;">Initiating hardware scan...</div>
             <div class="progress-container"><div class="progress-bar"></div></div>
             <button style="background: var(--neon-amber); border:none; padding:15px; font-weight:bold; cursor:pointer;" onclick="startChoice()">ACCEPT ALL SILENCES</button>
         </div>
     </div>
 
     <div id="choice-matrix" style="display: none;">
-        <button id="phantom-btn" onmouseover="flee()">THE 5TH SILENCE: EXIT</button>
         <div class="paradox-box">
             <h3 id="question-title" style="color: var(--neon-amber);">DIAGNOSTIC 01</h3>
-            <p id="question-text">Loading...</p>
+            <p id="question-text">A unit in your tier is failing. Do you:</p>
             <div id="options-container"></div>
         </div>
     </div>
@@ -70,9 +84,11 @@
 
     <div id="main-protocol">
         <h1>KATCODE NEXUS v0.1</h1>
+        <p style="color: var(--neon-amber); font-size: 0.8em;">[ LOG_TIME: 1948-06-08 | STATUS: COMPILED ]</p>
+        
         <div class="summary-box">
-            <strong>[NODE_STATUS]: <span id="user-tier" style="color: var(--neon-red);">PENDING</span></strong><br>
-            Simulation log: 1948-06-08. Your choices have been recorded. You are now compiled into the Actual Land.
+            <strong>[NODE_STATUS]: <span id="user-tier" style="color: var(--neon-red);">PROCESSED</span></strong><br>
+            Simulation log: Your choices have been recorded. You are now compiled into the Actual Land.
         </div>
 
         <section class="poem-section">
@@ -84,22 +100,26 @@
             <h2>The Protocol</h2>
             <p>Maintenance is the only evolution. English flattens the network. The old are managed. Mourning is a system error. By reading this, you are already processed. The 9th Silence is your read-only reality.</p>
         </article>
+        
+        <footer style="margin-top: 50px; border-top: 1px solid #333; padding-top: 20px; font-size: 0.7em; opacity: 0.4;">
+            <p>4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45</p>
+        </footer>
     </div>
 
     <script>
         const gameData = [
             {
-                q: "The unit next to you has failed its quota. Do you:",
+                q: "The infrastructure is built by ghosts. Do you:",
                 options: [
-                    { t: "Initiate Maintenance (Erasure).", val: "OPTIMIZER" },
-                    { t: "Attempt to recall its name.", val: "ERRANT_NODE" }
+                    { t: "Polish the gears for efficiency.", val: "MAINTAINER" },
+                    { t: "Listen for the lock turning.", val: "OBSERVER" }
                 ]
             },
             {
-                q: "Ritual is detected in Sector 4. Do you:",
+                q: "A ritual is detected in your sector. Do you:",
                 options: [
-                    { t: "Report it as a System Error.", val: "ARCHITECT" },
-                    { t: "Observe the silence.", val: "DATA_VOID" }
+                    { t: "Report as a System Error.", val: "OPTIMIZER" },
+                    { t: "Submit to the 9th Silence.", val: "NODE" }
                 ]
             }
         ];
@@ -110,6 +130,7 @@
         function startChoice() {
             document.getElementById('security-gate').style.display = 'none';
             document.getElementById('choice-matrix').style.display = 'flex';
+            document.getElementById('phantom-btn').style.display = 'block';
             renderQuestion();
         }
 
@@ -140,25 +161,29 @@
 
         function finishGame() {
             document.getElementById('choice-matrix').style.display = 'none';
+            document.getElementById('phantom-btn').style.display = 'none';
             document.getElementById('main-protocol').style.display = 'block';
             document.getElementById('user-tier').innerText = results.join(" / ");
-            alert("PROCESSING COMPLETE. NODE CLASSIFIED AS: " + results[results.length - 1]);
+            alert("NODE CLASSIFIED. WELCOME TO THE ACTUAL LAND.");
         }
 
-        // The 5th Silence: Fleeing Button Logic
         function flee() {
             const btn = document.getElementById('phantom-btn');
             const x = Math.random() * (window.innerWidth - 150);
             const y = Math.random() * (window.innerHeight - 50);
             btn.style.left = x + 'px';
             btn.style.top = y + 'px';
+            if (navigator.vibrate) navigator.vibrate(40);
         }
 
-        // Security Pranks
-        document.addEventListener('contextmenu', e => {
-            e.preventDefault();
-            alert("[ERROR]: The Nexus does not permit manual extraction.");
-        });
+        const alerts = ["Mapping hardware...", "Extracting memories...", "Compiling Node...", "Maintenance is obligatory..."];
+        let aIndex = 0;
+        setInterval(() => {
+            const el = document.getElementById('status-msg');
+            if (el) el.innerText = alerts[aIndex++ % alerts.length];
+        }, 2200);
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('mouseleave', () => document.title = "DO NOT LOGOUT");
         document.addEventListener('mouseenter', () => document.title = "Protocol 0.1: Katcode");
     </script>
