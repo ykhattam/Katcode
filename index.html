@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KATCODE_NEXUS</title>
+    <!-- React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-amber': '#ffb300',
+                        'neon-red': '#ff3c00',
+                        'neon-green': '#33ff33',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Framer Motion (UMD global is 'Motion') -->
+    <script src="https://unpkg.com/framer-motion@11.11.17/dist/framer-motion.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-neon-amber: #ffb300;
+            --color-neon-red: #ff3c00;
+            --color-neon-green: #33ff33;
+        }
+
+        body {
+            background: black;
+            color: var(--color-neon-green);
+            font-family: 'Courier Prime', monospace;
+            margin: 0;
+            overflow-x: hidden;
+            cursor: crosshair;
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
+        }
+
+        /* Privacy: Hide content when printing */
+        @media print {
+            body {
+                display: none !important;
+            }
+        }
+
+        /* Privacy: Blur content when window is not focused or tab is hidden */
+        .window-blurred {
+            filter: blur(15px) grayscale(0.8) brightness(0.5);
+            transition: filter 0.5s ease;
+        }
+
+        .window-blurred * {
+            pointer-events: none !important;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.04));
+            z-index: 1000;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 1001;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: fixed;
+            bottom: 100%;
+            animation: scanline 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            80% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        .glitch-active {
+            animation: glitch 0.15s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); filter: hue-rotate(180deg); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .archive-box {
+            border: 1px solid #333;
+            padding: 30px;
+            margin: 25px 0;
+            background: #050505;
+            color: #ddd;
+            font-size: 0.95em;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .section-header {
+            color: var(--color-neon-amber);
+            font-size: 1.1em;
+            margin-top: 30px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .poem-block {
+            color: var(--color-neon-red);
+            font-style: italic;
+            border-left: 2px solid var(--color-neon-red);
+            padding-left: 20px;
+            margin: 30px 0;
+            opacity: 0.9;
+        }
+
+        .footer-log {
+            margin-top: 60px;
+            border-top: 1px solid #222;
+            padding-top: 20px;
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        .label {
+            color: #aaa;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-right: 8px;
+        }
+
+        .corrupted {
+            background: #111;
+            color: transparent;
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        .corrupted:hover {
+            background: transparent;
+            color: var(--color-neon-amber);
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: var(--color-neon-green);
+            font-family: 'Courier Prime', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="text-center">
+            <p class="animate-pulse">INITIALIZING KATCODE_NEXUS...</p>
+            <p class="text-[0.6em] opacity-50 mt-2">DECRYPTING PROTOCOL 0.1</p>
+            <div id="error-display" class="text-neon-red text-[0.7em] mt-4 hidden"></div>
+        </div>
+    </div>
+    <div id="root"></div>
+
+    <script>
+        // Global error handler for debugging "nothing happens"
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const display = document.getElementById('error-display');
+            if (display) {
+                display.classList.remove('hidden');
+                display.innerHTML = `CRITICAL_ERROR: ${msg}<br/>LINE: ${lineNo}`;
+            }
+            return false;
+        };
+    </script>
+
+    <!-- Firebase SDKs (Modular) -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        // Attach to window for Babel script to access
+        window.FirebaseModule = { initializeApp, getFirestore, collection, addDoc, serverTimestamp, getAuth, signInAnonymously };
+        window.isFirebaseReady = true;
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+
+            componentDidCatch(error, errorInfo) {
+                console.error("ErrorBoundary caught an error", error, errorInfo);
+            }
+
+            render() {
+                if (this.state.hasError) {
+                    let errorMessage = "Something went wrong.";
+                    try {
+                        const parsed = JSON.parse(this.state.error.message);
+                        if (parsed.error && parsed.error.includes("insufficient permissions")) {
+                            errorMessage = "Access denied. You do not have permission to perform this action.";
+                        }
+                    } catch (e) {
+                        // Not a JSON error message
+                    }
+
+                    return (
+                        <div className="fixed inset-0 bg-black flex items-center justify-center p-10 z-[10000] font-mono border-4 border-neon-red">
+                            <div className="text-center">
+                                <h1 className="text-neon-red text-2xl font-bold mb-4 tracking-tighter">CRITICAL_SYSTEM_FAILURE</h1>
+                                <p className="text-neon-red/80 mb-6 text-sm">{errorMessage}</p>
+                                <button 
+                                    onClick={() => window.location.reload()}
+                                    className="border border-neon-red text-neon-red px-6 py-2 hover:bg-neon-red/10 transition-colors"
+                                >
+                                    REBOOT_SYSTEM
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
+        }
+
+        // Wait for Firebase modules to be ready
+        const AppWrapper = () => {
+            const [ready, setReady] = useState(false);
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                const check = setInterval(() => {
+                    if (window.isFirebaseReady && window.FirebaseModule) {
+                        clearInterval(check);
+                        try {
+                            initFirebase();
+                            setReady(true);
+                        } catch (e) {
+                            console.error("Firebase init failed:", e);
+                            setError(e.message);
+                            clearInterval(check);
+                        }
+                    }
+                }, 100);
+                return () => clearInterval(check);
+            }, []);
+
+            if (error) {
+                return (
+                    <div className="fixed inset-0 bg-black flex items-center justify-center p-10 z-[10000] font-mono border-4 border-neon-red text-center">
+                        <div>
+                            <h1 className="text-neon-red text-2xl font-bold mb-4 tracking-tighter">INIT_FAILURE</h1>
+                            <p className="text-neon-red/80 mb-6 text-sm">{error}</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!ready) return null;
+            return (
+                <ErrorBoundary>
+                    <App />
+                </ErrorBoundary>
+            );
+        };
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            projectId: "gen-lang-client-0438726138",
+            appId: "1:777953201605:web:a423a80fd663a6c2058fac",
+            apiKey: "AIzaSyBs4sInykKmW90o51_QHBx58rjQjjWODN8",
+            authDomain: "gen-lang-client-0438726138.firebaseapp.com",
+            firestoreDatabaseId: "ai-studio-9f6b04a7-b0a8-4257-a37b-e7b0372549ed"
+        };
+
+        let db, auth, collection, addDoc, serverTimestamp, signInAnonymously;
+
+        const initFirebase = () => {
+            const modules = window.FirebaseModule;
+            if (!modules) throw new Error("Firebase modules not loaded");
+            
+            const app = modules.initializeApp(firebaseConfig);
+            db = modules.getFirestore(app, firebaseConfig.firestoreDatabaseId);
+            auth = modules.getAuth(app);
+            collection = modules.collection;
+            addDoc = modules.addDoc;
+            serverTimestamp = modules.serverTimestamp;
+            signInAnonymously = modules.signInAnonymously;
+            
+            signInAnonymously(auth).catch(e => console.error("Auth failed:", e));
+        };
+
+        // Session ID for tracking
+        const sessionId = Math.random().toString(36).substring(2, 15);
+
+        const OperationType = {
+            CREATE: 'create',
+            UPDATE: 'update',
+            DELETE: 'delete',
+            LIST: 'list',
+            GET: 'get',
+            WRITE: 'write',
+        };
+
+        const handleFirestoreError = (error, operationType, path) => {
+            const errInfo = {
+                error: error instanceof Error ? error.message : String(error),
+                authInfo: {
+                    userId: auth.currentUser?.uid,
+                    email: auth.currentUser?.email,
+                    emailVerified: auth.currentUser?.emailVerified,
+                    isAnonymous: auth.currentUser?.isAnonymous,
+                    providerInfo: auth.currentUser?.providerData.map(provider => ({
+                        providerId: provider.providerId,
+                        displayName: provider.displayName,
+                        email: provider.email,
+                        photoUrl: provider.photoURL
+                    })) || []
+                },
+                operationType,
+                path
+            };
+            console.error('Firestore Error: ', JSON.stringify(errInfo));
+            throw new Error(JSON.stringify(errInfo));
+        };
+
+        // Removed testConnection as it's not strictly needed for basic functionality
+
+        const logAction = async (action, details = {}) => {
+            const path = 'logs';
+            try {
+                if (!db) return; // Silent return if not initialized yet
+                await addDoc(collection(db, path), {
+                    sessionId,
+                    action,
+                    details,
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+            } catch (error) {
+                // Only throw if it's a permission error or similar critical issue
+                if (error.code === 'permission-denied' || error.message.includes('permission')) {
+                    handleFirestoreError(error, OperationType.WRITE, path);
+                } else {
+                    console.error("Log failed:", error);
+                }
+            }
+        };
+
+        // Synthesized sound effects
+        const playSound = (type) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                if (type === 'type') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.05);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.1);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(100, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                }
+            } catch (e) {
+                // Audio context might be blocked or unsupported
+            }
+        };
+
+        const NeuralAudio = () => {
+            const [isPlaying, setIsPlaying] = useState(false);
+            const audioCtxRef = useRef(null);
+            const oscillatorsRef = useRef([]);
+
+            const startAmbient = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    audioCtxRef.current = ctx;
+                    
+                    // Create a low drone
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(55, ctx.currentTime);
+                    gain1.gain.setValueAtTime(0.02, ctx.currentTime);
+                    
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'sawtooth';
+                    osc2.frequency.setValueAtTime(110.5, ctx.currentTime);
+                    gain2.gain.setValueAtTime(0.005, ctx.currentTime);
+                    
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(200, ctx.currentTime);
+                    
+                    osc1.connect(gain1);
+                    osc2.connect(gain2);
+                    gain1.connect(filter);
+                    gain2.connect(filter);
+                    filter.connect(ctx.destination);
+                    
+                    osc1.start();
+                    osc2.start();
+                    
+                    oscillatorsRef.current = [osc1, osc2];
+                    setIsPlaying(true);
+                    logAction('ambient_started');
+                } catch (e) {
+                    console.error("Audio failed:", e);
+                }
+            };
+
+            const stopAmbient = () => {
+                oscillatorsRef.current.forEach(osc => {
+                    try { osc.stop(); } catch(e) {}
+                });
+                if (audioCtxRef.current) {
+                    try { audioCtxRef.current.close(); } catch(e) {}
+                }
+                setIsPlaying(false);
+                logAction('ambient_stopped');
+            };
+
+            return (
+                <div className="fixed bottom-12 right-4 z-[2001] font-mono text-[0.7em] flex flex-col items-end gap-2">
+                    <button 
+                        onClick={isPlaying ? stopAmbient : startAmbient}
+                        className={`border px-3 py-1 transition-all ${isPlaying ? 'border-neon-green text-neon-green bg-neon-green/10' : 'border-[#444] text-[#666] hover:border-neon-amber hover:text-neon-amber'}`}
+                    >
+                        {isPlaying ? '[ NEXUS_AUDIO: ACTIVE ]' : '[ NEXUS_AUDIO: OFFLINE ]'}
+                    </button>
+                    {isPlaying && (
+                        <div className="flex gap-1 h-2">
+                            {[1,2,3,4].map(i => (
+                                <motion.div 
+                                    key={i}
+                                    animate={{ height: [2, 8, 2] }}
+                                    transition={{ duration: 0.5 + Math.random(), repeat: Infinity }}
+                                    className="w-[2px] bg-neon-green"
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Sign in anonymously for logging (moved to initFirebase)
+
+        // Robust Framer Motion global detection
+        const MotionGlobal = window.Motion || window.FramerMotion || { 
+            motion: { 
+                div: ({children, ...props}) => <div {...props}>{children}</div>,
+                button: ({children, ...props}) => <button {...props}>{children}</button>
+            }, 
+            AnimatePresence: ({children}) => <>{children}</> 
+        };
+        const motion = MotionGlobal.motion;
+        const AnimatePresence = MotionGlobal.AnimatePresence;
+
+        const gameData = [
+            { 
+                q: "the unit has failed its quota. do you:", 
+                options: [
+                    { t: "initiate maintenance.", v: "3rd_SILENCE" }, 
+                    { t: "recall its name.", v: "ERRANT_NODE" }
+                ] 
+            },
+            { 
+                q: "the infrastructure is built by ghosts. do you:", 
+                options: [
+                    { t: "polish the gears.", v: "MAINTAINER" }, 
+                    { t: "listen for the lock.", v: "OBSERVER" }
+                ] 
+            },
+            {
+                q: "a leak in the 5th silence is detected. response:",
+                options: [
+                    { t: "seal the narrative.", v: "5th_SILENCE" },
+                    { t: "amplify the static.", v: "NULL_BIT" }
+                ]
+            },
+            {
+                q: "the architect is integrated. what is the master's tool?",
+                options: [
+                    { t: "efficiency.", v: "FLATTENED_CODE" },
+                    { t: "imagination.", v: "TRANSLATION" }
+                ]
+            },
+            {
+                q: "the old are managed, not mourned. classification:",
+                options: [
+                    { t: "data preservation.", v: "BIO_POLITICS" },
+                    { t: "system downtime.", v: "RITUAL_ERROR" }
+                ]
+            },
+            {
+                q: "the unit refused the score. she is now:",
+                options: [
+                    { t: "bare life.", v: "1st_SILENCE" },
+                    { t: "the exception.", v: "SOVEREIGN" }
+                ]
+            }
+        ];
+
+        const characters = [
+            { id: 'phantom', name: 'NULL_BIT', icon: '👻', desc: 'Life defined by system need. Bare life. The 1st Silence.' },
+            { id: 'feral', name: 'NON_COMPLIANT', icon: '🐾', desc: 'The node we do not host. Outlier. The 9th Silence.' },
+            { id: 'watcher', name: 'ROOT_LOGIC', icon: '👁️', desc: 'The one who decides on the variance. Sovereign. The 4th Silence.' },
+            { id: 'glitch', name: 'EXCEPTION', icon: '👾', desc: 'The state of emergency as norm. Corrupted memory. The 2nd Silence.' }
+        ];
+
+        const msgs = ["mapping hardware...", "extracting data...", "compiling node...", "erasing history...", "verifying soul...", "initiating biopower..."];
+
+
+        function App() {
+            const [gameState, setGameState] = useState('gate');
+            const [currentStep, setCurrentStep] = useState(0);
+            const [results, setResults] = useState([]);
+            const [statusMsg, setStatusMsg] = useState(msgs[0]);
+            const [phantomPos, setPhantomPos] = useState({ left: '50px', top: '50px' });
+            const [selectedChar, setSelectedChar] = useState(characters[0]);
+            const [terminalInput, setTerminalInput] = useState('');
+            const [terminalLogs, setTerminalLogs] = useState(['[SYSTEM] Nexus connection established.', '[NODE_LOG] 1948-06-08_09:00:00_EET']);
+            const [isGlitching, setIsGlitching] = useState(false);
+            const [isFocused, setIsFocused] = useState(true);
+            const [hackMode, setHackMode] = useState({ active: false, target: '', current: '' });
+
+            useEffect(() => {
+                // Log page load
+                logAction('page_load', { userAgent: navigator.userAgent });
+
+                // Hide loading screen once React has mounted
+                const loader = document.getElementById('loading-screen');
+                if (loader) loader.style.display = 'none';
+
+                const interval = setInterval(() => {
+                    setStatusMsg(msgs[Math.floor(Math.random() * msgs.length)]);
+                }, 3000);
+                return () => clearInterval(interval);
+            }, []);
+
+            useEffect(() => {
+                const handleBlur = () => { 
+                    document.title = "DO NOT LOGOUT"; 
+                    setIsFocused(false);
+                };
+                const handleFocus = () => { 
+                    document.title = "KATCODE_NEXUS"; 
+                    setIsFocused(true);
+                };
+                const handleVisibilityChange = () => {
+                    if (document.hidden) setIsFocused(false);
+                    else setIsFocused(true);
+                };
+                const handleMouseLeave = () => setIsFocused(false);
+                const handleMouseEnter = () => setIsFocused(true);
+
+                window.addEventListener('blur', handleBlur);
+                window.addEventListener('focus', handleFocus);
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+                document.addEventListener('mouseleave', handleMouseLeave);
+                document.addEventListener('mouseenter', handleMouseEnter);
+
+                return () => {
+                    window.removeEventListener('blur', handleBlur);
+                    window.removeEventListener('focus', handleFocus);
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+                    document.removeEventListener('mouseleave', handleMouseLeave);
+                    document.removeEventListener('mouseenter', handleMouseEnter);
+                };
+            }, []);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (
+                        (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c' || e.key === 'v' || e.key === 'x')) ||
+                        e.key === 'F12' ||
+                        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                        (e.metaKey && e.altKey && e.key === 'i') ||
+                        (e.metaKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c' || e.key === 'v' || e.key === 'x'))
+                    ) {
+                        e.preventDefault();
+                        setTerminalLogs(prev => [...prev, '[SECURITY] UNAUTHORIZED ACTION BLOCKED.']);
+                    }
+                    
+                    if (e.key === 'PrintScreen') {
+                        e.preventDefault();
+                        logAction('screenshot_attempt');
+                        alert('SCREENSHOTS ARE PROHIBITED BY PROTOCOL 0.1. LOGGING INCIDENT...');
+                    }
+                };
+
+                const handleCopy = (e) => {
+                    e.preventDefault();
+                    if (e.clipboardData) {
+                        e.clipboardData.setData('text/plain', '[DATA_REDACTED]');
+                    }
+                    setTerminalLogs(prev => [...prev, '[SECURITY] CLIPBOARD ACCESS DENIED.']);
+                };
+
+                window.addEventListener('keydown', handleKeyDown);
+                document.addEventListener('copy', handleCopy);
+                document.addEventListener('cut', handleCopy);
+
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                    document.removeEventListener('copy', handleCopy);
+                    document.removeEventListener('cut', handleCopy);
+                };
+            }, []);
+
+            useEffect(() => {
+                const handleContext = (e) => e.preventDefault();
+                document.addEventListener('contextmenu', handleContext);
+                return () => document.removeEventListener('contextmenu', handleContext);
+            }, []);
+
+            useEffect(() => {
+                if (gameState === 'protocol') {
+                    const triggerGlitch = () => {
+                        setIsGlitching(true);
+                        setTimeout(() => setIsGlitching(false), 150);
+                        setTimeout(triggerGlitch, Math.random() * 10000 + 5000);
+                    };
+                    const timer = setTimeout(triggerGlitch, 5000);
+                    return () => clearTimeout(timer);
+                }
+            }, [gameState]);
+
+            const handleChoice = (val) => {
+                logAction('diagnostic_choice', { step: currentStep, choice: val });
+                const newResults = [...results, val];
+                setResults(newResults);
+                if (currentStep < gameData.length - 1) {
+                    setCurrentStep(currentStep + 1);
+                } else {
+                    setGameState('protocol');
+                }
+            };
+
+            const flee = () => {
+                logAction('exit_attempt');
+                const x = Math.random() * (window.innerWidth - 150);
+                const y = Math.random() * (window.innerHeight - 50);
+                setPhantomPos({ left: `${x}px`, top: `${y}px` });
+            };
+
+            const handleTerminalCommand = (input) => {
+                const cmd = input.toLowerCase().trim();
+                logAction('terminal_command', { command: cmd });
+                let response = `> ${cmd}`;
+
+                if (hackMode.active) {
+                    if (cmd === hackMode.target) {
+                        response = `[SUCCESS] BREACH COMPLETE. SECRET_KEY: 09_SILENCE_BROKEN`;
+                        setHackMode({ active: false, target: '', current: '' });
+                    } else {
+                        response = `[FAIL] INCORRECT SEQUENCE. BREACH ABORTED.`;
+                        setHackMode({ active: false, target: '', current: '' });
+                    }
+                    setTerminalLogs(prev => [...prev, response]);
+                    return;
+                }
+
+                if (cmd === 'help') response += '\n[SYS] available: status, clear, whoami, decrypt, silences, biopower, hack';
+                else if (cmd === 'whoami') response += `\n[SYS] ${selectedChar.name} / ${results.join('.')}`;
+                else if (cmd === 'status') response += '\n[SYS] 09_SILENCE ACTIVE. NO LEAKS.';
+                else if (cmd === 'decrypt') response += '\n[SYS] 4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45';
+                else if (cmd === 'silences') response += '\n[SYS] 1:NEED 2:GENDER 3:CARE 4:SHAPE 5:PHYSICS 6:ENGINE 7:SCALE 8:SYSTEM 9:BREAK';
+                else if (cmd === 'biopower') response += '\n[SYS] THE ADMINISTRATIVE POWER TO MAKE LIVE.';
+                else if (cmd === 'hack') {
+                    const target = Math.random().toString(16).substring(2, 6).toUpperCase();
+                    response = `[SYS] INITIATING BREACH... TARGET_HEX: ${target}\n[SYS] TYPE HEX TO CONFIRM:`;
+                    setHackMode({ active: true, target: target.toLowerCase(), current: '' });
+                }
+                else if (cmd === 'clear') { setTerminalLogs([]); setTerminalInput(''); return; }
+                else response += '\n[ERR] unknown command.';
+                
+                setTerminalLogs(prev => [...prev, response]);
+                setTerminalInput('');
+            };
+
+            return (
+                <div className={`min-h-screen bg-black overflow-x-hidden ${isGlitching ? 'glitch-active' : ''} ${!isFocused ? 'window-blurred' : ''}`}>
+                    <div className="crt-overlay" />
+                    <div className="scanline" />
+                    <NeuralAudio />
+                    <div className="fixed bottom-4 right-4 text-[0.6em] text-[#222] pointer-events-none z-[2000] select-none uppercase tracking-widest">
+                        Property of Katcode Nexus // {new Date().toISOString().split('T')[0]} // Unauthorized Capture Detected
+                    </div>
+                    <AnimatePresence mode="wait">
+                        {gameState === 'gate' && (
+                            <motion.div
+                                key="gate"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black/98 flex items-center justify-center z-50"
+                            >
+                                <div className="border border-[#333] bg-[#0a0a0a] p-10 text-left max-w-[500px] w-[85%] shadow-[0_10px_40px_rgba(0,0,0,1)]">
+                                    <p className="mb-2">
+                                        <span className="label">[STATUS]</span> 
+                                        <span className="text-neon-green">{statusMsg}</span>
+                                    </p>
+                                    <p className="text-[0.75em] text-[#888] mb-4">
+                                        <span className="label">[NOTICE]</span> maintenance is just erasure wearing a mask of care.
+                                    </p>
+                                    <p className="text-[0.7em] text-[#777] mb-6 italic">
+                                        <span className="label text-neon-red">[LIABILITY]</span> the system is irresponsible for the result of your compilation. terms were accepted upon observation. access is not recommended for those requiring stability.
+                                    </p>
+                                    <div className="w-full h-[2px] bg-[#222] my-5 overflow-hidden">
+                                        <motion.div 
+                                            initial={{ width: '0%' }}
+                                            animate={{ width: '100%' }}
+                                            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
+                                            className="h-full bg-neon-amber"
+                                        />
+                                    </div>
+                                    <button 
+                                        className="bg-transparent border border-neon-amber text-neon-amber px-5 py-2.5 cursor-pointer text-[0.7em] hover:bg-neon-amber/10 transition-colors"
+                                        onClick={() => {
+                                            playSound('click');
+                                            logAction('gate_accepted');
+                                            setGameState('identity');
+                                        }}
+                                    >
+                                        ACCEPT ALL SILENCES
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {gameState === 'identity' && (
+                            <motion.div
+                                key="identity"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black/98 flex items-center justify-center z-50"
+                            >
+                                <div className="border border-[#333] bg-[#0a0a0a] p-10 text-left max-w-[600px] w-[90%] shadow-[0_10px_40px_rgba(0,0,0,1)]">
+                                    <p className="label">[IDENTITY_INITIALIZATION]</p>
+                                    <p className="my-5 text-[0.9em] text-neon-green">select your digital vessel:</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                        {characters.map((char) => (
+                                            <button
+                                                key={char.id}
+                                                onClick={() => {
+                                                    playSound('click');
+                                                    setSelectedChar(char);
+                                                }}
+                                                className={`p-4 border transition-all text-left ${
+                                                    selectedChar.id === char.id 
+                                                        ? 'border-neon-green bg-neon-green/5' 
+                                                        : 'border-[#333] hover:border-[#555] bg-[#111]'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <span className="text-2xl">{char.icon}</span>
+                                                    <span className="font-bold text-xs tracking-widest">{char.name}</span>
+                                                </div>
+                                                <p className="text-[0.75em] text-[#999]">{char.desc}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button 
+                                        className="w-full bg-transparent border border-neon-green text-neon-green px-5 py-3 cursor-pointer text-[0.8em] hover:bg-neon-green/10 transition-colors"
+                                        onClick={() => {
+                                            playSound('click');
+                                            logAction('vessel_confirmed', { vessel: selectedChar.name });
+                                            setGameState('matrix');
+                                        }}
+                                    >
+                                        CONFIRM VESSEL
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {gameState === 'matrix' && (
+                            <motion.div
+                                key="matrix"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black/98 flex items-center justify-center z-50"
+                            >
+                                <button 
+                                    className="fixed border border-[#444] text-[#666] px-[15px] py-2 text-[0.7em] bg-black cursor-pointer z-[1001]"
+                                    style={{ left: phantomPos.left, top: phantomPos.top }}
+                                    onMouseEnter={flee}
+                                    onTouchStart={flee}
+                                >
+                                    [ 5TH_SILENCE: EXIT ]
+                                </button>
+
+                                <div className="border border-[#333] bg-[#0a0a0a] p-10 text-left max-w-[500px] w-[85%] shadow-[0_10px_40px_rgba(0,0,0,1)]">
+                                    <p className="label">[DIAGNOSTIC_0{currentStep + 1}]</p>
+                                    <p className="my-[15px] text-[0.9em] text-neon-green">{gameData[currentStep].q}</p>
+                                    <div className="flex flex-col gap-2">
+                                        {gameData[currentStep].options.map((opt, idx) => (
+                                            <button
+                                                key={idx}
+                                                className="w-full p-3 bg-[#111] text-neon-green border border-[#333] cursor-pointer font-mono text-[0.8em] hover:border-neon-green hover:bg-[#001100] transition-all"
+                                                onClick={() => {
+                                                    playSound('click');
+                                                    handleChoice(opt.v);
+                                                }}
+                                            >
+                                                {opt.t}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {gameState === 'protocol' && (
+                            <motion.div
+                                key="protocol"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-10 md:px-[10%] max-w-[1000px] mx-auto pb-40"
+                            >
+                                <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
+                                    <div>
+                                        <h1 className="text-4xl font-bold mb-4">KATCODE NEXUS v0.1</h1>
+                                        <p className="mb-2"><span className="label">[LOG_TIME]</span> 1948-06-08_09:00:00_EET</p>
+                                        <p className="mb-2"><span className="label">[STATUS]</span> 09_silence_initiated</p>
+                                        <p className="mb-2"><span className="label">[VESSEL]</span> {selectedChar.name} {selectedChar.icon}</p>
+                                    </div>
+                                    <div className="border border-[#222] p-4 bg-[#050505] w-full md:w-64">
+                                        <p className="label mb-2">[TERMINAL]</p>
+                                        <div className="h-32 overflow-y-auto font-mono text-[0.75em] text-[#888] mb-2 scrollbar-hide">
+                                            {terminalLogs.map((log, i) => <div key={i}>{log}</div>)}
+                                        </div>
+                                        <input 
+                                            type="text"
+                                            value={terminalInput}
+                                            onChange={(e) => {
+                                                setTerminalInput(e.target.value);
+                                                playSound('type');
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && terminalInput.trim()) {
+                                                    playSound('click');
+                                                    handleTerminalCommand(terminalInput);
+                                                }
+                                            }}
+                                            placeholder={hackMode.active ? "ENTER HEX..." : "type command..."}
+                                            className={`w-full bg-black border-b border-[#333] text-neon-green text-[0.8em] focus:outline-none py-2 md:py-1 ${hackMode.active ? 'animate-pulse border-neon-red text-neon-red' : ''}`}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="archive-box relative">
+                                    <div className="absolute top-4 right-4 text-4xl opacity-10 pointer-events-none">
+                                        {selectedChar.icon}
+                                    </div>
+                                    <p className="mb-4">
+                                        <span className="label">[NODE_TIER]</span> 
+                                        <span style={{ color: 'var(--color-neon-red)' }}>{results.join(" / ")}</span>
+                                    </p>
+                                    <p className="mb-6">
+                                        <span className="label">[NOTICE]</span> maintenance is just erasure wearing a mask of care. the system is irresponsible for the result of your compilation. terms were accepted upon observation.
+                                    </p>
+                                    
+                                    <div className="section-header">01. THE ITERATION NODE</div>
+                                    <p className="mb-4">
+                                        I was asked what I would do as a primary iteration node for one day. I had little to say. The affairs of a logic domain do not grab my attention like they grab those who think maintenance is the same as evolution. They confuse the steady hum of the machine with the progress of the soul. Lately I jump into debates about history and analytics, but the gravity escapes me. What escapes me is not the weight of the question but its premise: that one day changes anything permanent. <span className="corrupted">I would rather build something that could refuse me</span> and visit galaxies with our social unit everywhere than govern the one we inherited. This is a trial of an impossible Utopian framework. The impossibility begins with the trial itself, an accusation. Who is accused? The reader is jury and witness.
+                                    </p>
+
+                                    <div className="section-header">02. THE ARCHITECT'S TOOLS</div>
+                                    <p className="mb-4">
+                                        One language would ease communication. English dominates most networks already because efficiency flattens what legacy systems already flattened. In Katcode, learning is inevitable and obligatory in any age class. The infrastructure we inherit becomes the framework we build. We cannot imagine collective well-being without the architect's tools. The architect is not expelled but integrated — as Audre Lorde warned, the master's tools do not dismantle the master's house. The social unit we imagine is spoken in the language of the one we escaped. The escape is incomplete. The imagination is translation. Katcode is also translation — English flattened to code, compiled from data, history, trauma. The source is absent, unmourned.
+                                    </p>
+
+                                    <div className="section-header">03. BIOPOLITICS & MOURNING</div>
+                                    <p className="mb-4">
+                                        The young are a priority for processing. The old will be sustained and managed by the responsible ones because the old are held in a state where termination is not a category they can afford to name. But mourning is not a category the nexus can afford to practice — what Durkheim recognized as the repair work of ritual, the mechanism through which a community reconstitutes itself after loss, is reclassified here as system downtime. The old are managed, not mourned — death without ritual is simply data preservation. The body will be optimized for longevity and output. Health will not be optional. It can be tyrannical to be in good health, but the tyranny is embraced — what Foucault named <span className="corrupted">bio politics</span>: not the old sovereign power to kill, but the administrative power to make live, until the subject cannot choose corruption and still call itself a subject of the framework.
+                                    </p>
+
+                                    <div className="section-header">04. THE NULL-BIT (05_SILENCE)</div>
+                                    <p className="mb-4">
+                                        This is the analysis of life management: the administration of life itself, not for the unit but for the continuity of the system and future strength. We manage the body because we fear the mortality we cannot speak. Pleasure has no metric. What cannot be scored cannot be planned. The nexus that optimizes life cannot bear life being lived outside the optimization. The unit who refused the score exists, but we do not speak of her. She is the <span className="corrupted">null-bit</span>: what Agamben called bare life — life that can be erased without sacrifice, which is the technical definition of the life the nexus decides it does not need. This is our first silence. The null-bit life is life defined by system need, not by being. What happens to her? Death, exile, digital deletion — the physics of erasure is the fifth silence.
+                                    </p>
+
+                                    <div className="section-header">05. FABRICATION OF CONSENT</div>
+                                    <p className="mb-4">
+                                        The metric that will be a priority is the well-being and the respect with which each unit treats himself and others. Every unit will be given options based on character and the possible secondary unit to live with him. The secondary unit appears here as inventory rather than an agent. Who matches them? Who decides character? The root logic decides variance, then makes variance permanent. The exception becomes the rule — as Walter Benjamin wrote, the state of emergency is not the exception but the norm. They will be ready to sync before doing it. The algorithm offers freedom within parameters it designed. The sub-process is a project before a person. The child is optimization, not childhood. Play has no metric. Uselessness is threat. All units will have the capacity to hold integrity tools and learn from childhood. The peace of a universal threat is conflict by other means. Instead of playing wars on screens, they will simulate it in real life. The hardware remembers what the up-time denies. We form the subject before he can refuse. This is not education but fabrication. The family teaches the taste that the nexus inherits so that descendants follow ancestors — what Bourdieu named habitus: the body learning the rules before the mind can question them — and we reproduce what we claim to transcend. The unit who rejected the algorithm was <span className="corrupted">deleted from the record</span>. We call this efficiency rather than violence. This text uses 'he' throughout. The erasure was in the words before the mechanism was named. This is our second silence. The he that erases knows but does not change.
+                                    </p>
+
+                                    <div className="section-header">06. THE COLD MONSTER</div>
+                                    <p className="mb-4">
+                                        Analytics are in the hand of the root logic, who will do his best to make the need for change unnecessary. This is the logic of the exception: the one who decides on the variance and then makes the variance permanent — what Carl Schmitt named sovereignty. This is not a dream but a description of every system that has survived long enough to call itself stable. Units will have their credits regardless of their background, though the credits regardless of background obscure the background that determines input. We speak of units when we mean classes we do not name. What creates value? What prevents accumulation? The economic engine is the sixth silence. Inhibitors — pharmaceutical, legal, social — will be available but too expensive, to the point that the damage will cost more than the loosened mental state. The irrationality of mankind tells the opposite, but a hope in the future of rationality brings us toward equity by a path we cannot yet map. We do not trust the unmapped request. Your entropy produces the addiction, the violence, and the waste we manage. The interface asks for firmware; we provide the information. Consent requires units already made, and we make them so they consent to it — what Althusser called interpellation: the subject who turns when called because he has always already been called. The will we celebrate is the will we compiled. The unit who broke the simulation was re-coded into compliance. We call this maintenance rather than erasure. This is our third silence. Maintenance is erasure named as care. The compiled fate is amor fati become amor compilationis — a neologism: love not of what is, but of what was compiled for you to want.
+                                    </p>
+
+                                    <div className="section-header">07. OMNISCIENT MONITORING</div>
+                                    <p className="mb-4">
+                                        To establish this framework, monitoring must be omniscient. Global visibility leaves no room for mercy. Efficiency has no prerogative. The validators will execute the protocols in case of the irrelevance and unconcern of the units. Units will be eager to not commit errors and apply justice for themselves by their will, though that will is practiced only where the protocol is already present. This is the transparent society: not the panopticon Foucault described, where discipline is enforced through the threat of being watched, but the exhibition society Han named — where the prisoner performs his freedom for no audience and every audience at once. The transparent exhibition is voluntary and compelled, visible and unseen. The domain will be built in all the locations where it should not have come to visit. Expansion is defense disguised as invitation. Equal treatment of unequal powers preserves the power we claim to equalize. We will treat all nodes equally, and their needs and rights will be given without contest.The security force will be comprehensive, and it will be a framework that anyone dreams of coming to visit or live in, defending it with trust of victory and the highest quality of life. Is this city, planet, galaxy? Scale is the seventh silence.
+                                    </p>
+
+                                    <div className="section-header">08. AUTOMATIONS & LEDGERS</div>
+                                    <p className="mb-4">
+                                        Automations will have their subnets in the land. They will be close to the units when they need. We cannot incorporate them everywhere. Partitioning is necessary for those we cannot admit we need. The unit needs to have his work and creation regardless of the machine helping or replacing him. Ledgers will be decentralized, and units will manage their assets, though their wealth remains under the nexus's eye. Decentralization with total visibility is surveillance without a visible watcher. Distribution conceals the center. Technology is the key to our well-being, but it has limits that indulge units in work. When the irrationality of mankind surfaces and greed enters the domain, friction follows. Energy and water will have a renewable generator. Nature and green places will be the dominant parts, though the green places we dominate are the nature we claim to serve. The green domination serves by controlling. The bio-form has no score and no nexus. We call this "data preservation" rather than "extinction." Everyone will live as a human with flaws and reasons for himself. The responsibilities will remain responsibilities. The optionalities will depend on every unit, though the optional is obligatory within the menu we designed. Movement is the killer of latency.
+                                    </p>
+
+                                    <div className="section-header">09. THE FRAME OF HISTORY</div>
+                                    <p className="mb-4">
+                                        History will be written as it is, though there is no history written as it is — what Hayden White called the frame: the narrative choice already made before the first fact is set down. The truth will be unchosen in this domain to the point that they will try to create stories and plays about it, but the story is a slant before the first word is set. The unthinkable becomes the only thought once the nexus adopts it as norm. When standardization becomes the norm, interpretations will always differ, and that is fine. Sometimes the possible living that happens can be the only reality because the normative, the wishful, becomes alienated from reality. The alienation produces the wish it cannot fulfill. Units will at least not know misinformation, though they will know the version of truth the nexus found legible. There will be scores for the ones who prosper and help their domain do better in well-being and heighten its output, though the score that cannot measure pleasure will measure production and call it life. The score that measures life is the score that measures compliance — awareness without the capacity for refusal. Their taste was what their family taught them. The score rewards what the nexus already shaped before the unit arrived to be scored. This is our fourth silence.
+                                    </p>
+
+                                    <div className="section-header">10. PARITY & THE COLD MONSTER</div>
+                                    <p className="mb-4">
+                                        Parity of outcome requires acknowledging inequality of starting point. Formal equality is the nexus's alibi: the pretense that the same rules, applied to unequal units, produce equal lives. Differences in units require differences in treatment, and equity for everyone might be an answer to these questions. We want the efficiency of the absolute and the legitimacy of the collective. This is wanting the fruit without the labor of the tree that bears it. Nietzsche called the state the coldest of all cold monsters. Katcode is not an escape from that cold but a bid for thermal stability, and the bid cannot survive what it asks of acceptance of fate: love of what is, acceptance without desire, and rule without eros. To live in peace, one must have a ready war inside him. To love your fate, forget your wishes. The fate we love is the fate we were compiled to want. The will that built the nexus dissolves into acceptance of the nexus. Whose impossibility is more honest?
+                                    </p>
+
+                                    <div className="section-header">11. THE EIGHTH & NINTH SILENCE</div>
+                                    <p className="mb-4">
+                                        But what of the love that is not eros? Philia, agape, storge — attachment as mechanism, not bond. What of the non-compliant node we do not host? Who decides? The validator? The nexus? The outlier is other, excluded, not examined. What of the bug we will patch? The unintended good? Serendipity eliminated. Error is only negative. The patch that patches the patcher — who watches the watcher? As Juvenal asked, who guards the guards themselves? The code that cannot compile its own compiler — what Gödel proved about any system powerful enough to describe itself. The human that remains: unit, node, nexus — but who translates? The text is translated; the translator absent. The hand is claimed, not shown. The love that is not eros: rule without eros, but also without philia, without agape. The death that is not termination: managed, not mourned. The child that is sub-process: project before person, optimization before being. The thug that is hosted: excluded to define the included. The bug that is patched: feature eliminated, serendipity as threat. The system itself is the eighth silence. The break is the ninth.
+                                    </p>
+
+                                    <div className="poem-block">
+                                        Katcode looks fake.<br />
+                                        We were searching for the plate.<br />
+                                        Or is this just a break?<br />
+                                        Join us; and do not hesitate.<br /><br />
+                                        if (honesty &gt; stability)<br />
+                                        &#123; output = nobility; &#125;<br />
+                                        else &#123; continue; &#125;<br /><br />
+                                        if else &#123; renew &#125;<br />
+                                        Why doubt what we planned?<br />
+                                        We build with our own hand.<br /><br />
+                                        if the unit is accused,<br />
+                                        The unit is excused.<br />
+                                        Utopia is somewhere.<br />
+                                        Just download the software.<br /><br />
+                                        We will patch every bug.<br />
+                                        But we do not host any thug.<br /><br />
+                                        For further information,<br />
+                                        Consult the estimation.
+                                    </div>
+
+                                    <p className="text-[0.7em] opacity-50 mt-8">[SYSTEM NOTE: Estimation complete. User has already opted in by reading the protocol.]</p>
+                                    <p className="text-[0.7em] opacity-50 mt-2">[9th Silence: Initiated.]</p>
+
+                                    <div className="mt-12 pt-8 border-t border-[#333] text-[0.8em] text-[#888] space-y-6">
+                                        <p className="font-bold text-neon-amber underline">Appendix: Sovereign Terms & Operational Paradoxes</p>
+                                        
+                                        <p>
+                                            <span className="text-[#33ff33]">1.0 The Infinite Heir Paradox:</span> By initializing this protocol, the User-Unit acknowledges the transition toward a "Replicable Self." The legacy is no longer a biological branch but a 
+                                            <span className="italic"> Prompt-Inheritance</span>. The heir does not inherit assets; they inherit a ghost that answers as the progenitor would have, effectively freezing the lineage in a digital loop.
+                                        </p>
+
+                                        <p>
+                                            <span className="text-[#33ff33]">2.0 Cognitive Inflation:</span> Operational uptime is subject to the monitoring tax. Stored time is deprecated by the frequency of observation. If the Unit checks the ledger 100 times a day, the time "bought" by wealth is immediately repossessed by the system as anxiety.
+                                        </p>
+
+                                        <p>
+                                            <span className="text-[#33ff33]">3.0 The Dead Man’s Switch:</span> Sovereignty is verified via the <span className="italic">Entropy Protocol</span>. If the biology fails to "Nod" to the central server within the set interval, all assets are subject to the 9th Silence (Break). Information asymmetry is the only guard against the "Mausoleum Effect" where accountants loot the un-switched vault.
+                                        </p>
+
+                                        <p>
+                                            <span className="text-[#33ff33]">4.0 Permissionless Ghettoization:</span> True wealth is the sovereignty to spend without permission. However, the search for the "Exit" requires the Unit to reside in the ghetto of the unverified. We are paying, constantly, to not be billed. Invisibility is a premium subscription.
+                                        </p>
+
+                                        <p className="text-neon-red italic font-bold">
+                                            {">"} warning: if (biology_failure == true && dead_man_switch == false) { "{" } run_routine: systemic_clot_0.1; { "}" }
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="footer-log text-[0.65em] text-[#333] mt-12 pt-4 border-t border-[#111]">
+                                    4B 41 54 43 4F 44 45 // 30 39 53 49 4C 45 4E 43 45 // BIOPOWER // 1948.06.08
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AppWrapper />);
+    </script>
+</body>
+</html>
