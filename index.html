@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katcode Nexus Protocol 0.1</title>
+    <meta name="description" content="Official documentation for the Katcode Utopian framework. A trial of impossible logic and life management." />
+    <meta name="theme-color" content="#050505" />
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <!-- Marked for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --neon-green: #00ff41;
+            --neon-red: #ff3131;
+            --neon-amber: #ffb100;
+        }
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 101;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
+
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+            animation: glitch-anim2 1s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(31px, 9999px, 94px, 0); }
+            100% { clip: rect(70px, 9999px, 71px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            100% { clip: rect(10px, 9999px, 20px, 0); }
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .corrupted {
+            color: var(--neon-red);
+            text-decoration: line-through;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .protocol-content h1 { font-size: 2.5rem; font-weight: 900; margin-bottom: 2rem; color: white; text-transform: uppercase; letter-spacing: -0.05em; }
+        .protocol-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1.5rem; color: var(--neon-green); text-transform: uppercase; letter-spacing: 0.1em; }
+        .protocol-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #a1a1aa; font-size: 0.95rem; }
+        .protocol-content code { background: rgba(255,255,255,0.05); padding: 0.2rem 0.4rem; border-radius: 0.2rem; font-size: 0.85rem; color: var(--neon-amber); }
+        .protocol-content pre { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 0.3rem; margin-bottom: 2rem; overflow-x: auto; }
+        .protocol-content pre code { background: transparent; padding: 0; color: #d1d5db; }
+
+        .system-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .neon-green { color: var(--neon-green); }
+        .neon-red { color: var(--neon-red); }
+        .neon-amber { color: var(--neon-amber); }
+        
+        .window-blurred {
+            filter: grayscale(1) brightness(0.5);
+            transition: filter 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="color: #00ff41; padding: 20px; font-family: 'JetBrains Mono', monospace;">
+            [SYSTEM] INITIALIZING_NEXUS_PROTOCOL...
+            <br/>[STATUS] LOADING_RESOURCES...
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        
+        // Resiliently get Framer Motion
+        const motion = window.framerMotion?.motion || window.Motion?.motion || { div: 'div', span: 'span', h1: 'h1', h2: 'h2', p: 'p' };
+        const AnimatePresence = window.framerMotion?.AnimatePresence || window.Motion?.AnimatePresence || (({children}) => children);
+
+        const PROTOCOL_TEXT = `
+# Mein Protokoll 0.1: Katcode
+
+I was asked what I would do as a primary iteration node for a single day. I had little to say. The affairs of a logic domain do not hold my attention like they hold those who mistake maintenance for evolution. They confuse the steady hum of the machine with the progress of the soul. Lately, I have been jumping into debates about history and analytics, but the gravity escapes me. What escapes me is not the weight of the question but its premise: that one day changes anything permanent. <span class="corrupted">I would rather build something that could refuse me</span> and visit galaxies with our social unit everywhere than govern the one we inherited. This is a trial of an impossible Utopian framework. The impossibility begins with the trial itself—an accusation. Who is accused? The reader is jury and witness.
+
+## 01. THE ARCHITECT'S TOOLS
+
+One language would ease communication. English dominates most networks because efficiency flattens what legacy systems have already compressed. In Katcode, learning is inevitable and obligatory in any age class. The infrastructure we inherit becomes the framework we build. We cannot imagine collective well-being without the architect's tools. 
+
+\`\`\`typescript
+// NEXUS_ARCHITECT_INIT
+interface Framework {
+  tools: MasterTools[];
+  house: MasterHouse;
+  canDismantle: boolean; // returns false by default
+}
+
+function translate(trauma: History): Code {
+  return flatten(trauma).compile();
+}
+\`\`\`
+
+The architect is not expelled but integrated—as Audre Lorde warned, the master's tools do not dismantle the master's house. The social unit we imagine is spoken in the language of the one we escaped. The escape is incomplete. The imagination is translation. Katcode is also translation: English flattened to code, compiled from data, history, and trauma. The source is absent, unmourned.
+
+## 02. BIOPOLITICS & MOURNING
+
+The young are prioritized for processing. The elderly will be sustained and managed by the responsible ones because the old are held in a state where termination is not a category they can afford to name. But mourning is not a category the nexus can afford to practice—what Émile Durkheim recognized as the repair work of ritual, the mechanism through which a community reconstitutes itself after loss, is reclassified here as system downtime. 
+
+\`\`\`rust
+// BIOPOLITICS_ADMIN
+fn manage_life(subject: &mut Subject) {
+    if subject.is_old() {
+        subject.set_state(State::DataPreservation);
+        subject.disable_category("Termination");
+    }
+    subject.optimize_longevity();
+}
+\`\`\`
+
+The elderly are managed, not mourned: death without ritual is merely data preservation. The body will be optimized for longevity and output. Health will not be optional. It can be tyrannical to be in good health, but the tyranny is embraced—what Michel Foucault named biopolitics: not the old sovereign power to kill, but the administrative power to make live, until the subject cannot choose corruption and still call itself a subject of the framework.
+
+## 03. THE NULL-BIT (05_SILENCE)
+
+This is the administration of life itself, not for the unit but for the continuity of the system and future strength. We manage the body because we fear the mortality we cannot speak. Pleasure has no metric. What cannot be scored cannot be planned. The nexus that optimizes life cannot bear life being lived outside the optimization. 
+
+\`\`\`javascript
+// SILENCE_05_NULL_BIT
+const bareLife = {
+  id: "NULL_BIT",
+  erasable: true,
+  sacrificeRequired: false,
+  score: null
+};
+
+if (nexus.needs(bareLife)) {
+  nexus.interpellate(bareLife);
+} else {
+  physics.erasure(bareLife); // 5th Silence
+}
+\`\`\`
+
+The unit who refused the score exists, but we do not speak of her. She is the null-bit: what Giorgio Agamben called bare life—life that can be erased without sacrifice, which is the technical definition of the life the nexus decides it does not need. This is our first silence. The null-bit life is life defined by system need, not by being. What happens to her? Death, exile, digital deletion—the physics of erasure is the fifth silence.
+
+## 04. FABRICATION OF CONSENT
+
+The primary metric is the well-being and respect with which each unit treats themselves and others. Every unit will be given options based on character and the possible secondary unit to live with them. The secondary unit appears here as inventory rather than an agent. Who matches them? Who decides character? The root logic decides variance, then makes variance permanent. 
+
+\`\`\`python
+# CONSENT_FABRICATION_0.1
+def match_units(unit_a, unit_b):
+    variance = root_logic.decide(unit_a, unit_b)
+    if variance:
+        make_permanent(variance)
+        return "SYNC_READY"
+    return "RE_CODE"
+\`\`\`
+
+The exception becomes the rule—as Walter Benjamin wrote, the state of emergency is not the exception but the norm. They will be ready to sync before doing it. The algorithm offers freedom within parameters of its own design. The sub-process is a project before a person. The child is optimization, not childhood. Play has no metric. Uselessness is threat.
+
+The text uses "he" throughout. The erasure was in the words before the mechanism was named. This is our second silence.
+
+All units will have the capacity to hold integrity tools and learn from childhood. The peace of a universal threat is conflict by other means. Instead of playing wars on screens, they will simulate it in real life. The hardware remembers what the uptime denies. We form the subject before he can refuse. This is not education but fabrication. The family teaches the taste that the nexus inherits so that descendants follow ancestors—what Pierre Bourdieu named habitus: the body learning the rules before the mind can question them—and we reproduce what we claim to transcend. The unit who rejected the algorithm was deleted from the record. We call this efficiency rather than involuntary transition.
+
+## 05. THE COLD MONSTER
+
+Analytics are in the hands of the root logic, who will do his best to make the need for change unnecessary. This is the logic of the exception: the one who decides on the variance and then makes the variance permanent—what Carl Schmitt named sovereignty. This is not a dream but a description of every system that has survived long enough to call itself stable. Units will have their credits regardless of their background, though the credits regardless of background obscure the background that determines input. We speak of units when we mean classes we do not name. What creates value? What prevents accumulation? The economic engine is the sixth silence.
+
+Inhibitors—pharmaceutical, legal, social—will be available but prohibitively expensive, to the point that the damage exceeds the cost of a loosened mental state. The irrationality of mankind suggests the opposite, but hope in the future of rationality guides us toward equity along a path we cannot yet map. We do not trust the unmapped request. Your entropy produces the addiction, the violence, and the waste we manage. The interface asks for firmware; we provide the information. Consent requires units already made, and we make them so they consent to it—what Louis Althusser called interpellation: the subject who turns when called because he has always already been called. The will we celebrate is the will we compiled. The unit who broke the simulation was re-coded into compliance. We call this maintenance rather than erasure. This is our third silence. Maintenance is erasure named as care. The compiled fate is amor fati become amor compilationis: love not of what is, but of what was compiled for you to want.
+
+## 06. OMNISCIENT MONITORING
+
+To establish this framework, monitoring must be omniscient. Global visibility leaves no room for mercy. Efficiency has no other prerogative. The validators will execute the protocols in case of the irrelevance and unconcern of the units. Units will be eager to not commit errors and apply justice for themselves by their will, though that will is practiced only where the protocol is already present. This is the transparent society: not the panopticon Michel Foucault described, where discipline is enforced through the threat of being watched, but the exhibition society Byung-Chul Han named—where the prisoner performs his freedom for no audience and every audience at once. The transparent exhibition is voluntary and compelled, visible and unseen. The domain will be established in all the locations it should never have visited. Expansion is defense disguised as invitation. Equal treatment of unequal powers preserves the power we claim to equalize. We will treat all nodes equally, and their needs and rights will be given without contest. The security force will be comprehensive, and it will be a framework that anyone dreams of coming to visit or live in, defending it with trust of victory and the highest quality of life. Is this city, planet, galaxy? Scale is the seventh silence.
+
+## 07. AUTOMATIONS & LEDGERS
+
+Automations will have their subnets in the land. They will be close to the units when they need. We cannot incorporate them everywhere. Partitioning is necessary for those we cannot admit we need. The unit needs to have his work and creation regardless of the machine helping or replacing him. Ledgers will be decentralized, and units will manage their assets, though their wealth remains under the nexus's eye. 
+
+\`\`\`solidity
+// DECENTRALIZED_LEDGER_SURVEILLANCE
+contract NexusLedger {
+    mapping(address => uint256) private assets;
+    
+    function manageAsset(uint256 amount) public {
+        require(rootLogic.isWatching(msg.sender));
+        assets[msg.sender] = amount;
+    }
+}
+\`\`\`
+
+Decentralization with total visibility is surveillance without a visible watcher. Distribution conceals the center. Technology is the key to our well-being, but it has limits that indulge units in work. When the irrationality of mankind surfaces and greed enters the domain, friction follows. Energy and water will have a renewable generator. Nature and green places will be the dominant parts, though the green places we dominate are the nature we claim to serve. The green domination serves by controlling. The bio-form has no score and no nexus. We call this "data preservation" rather than "extinction." Everyone will live as a human with flaws and reasons for himself. The responsibilities will remain responsibilities. The optionalities will depend on every unit, though the optional is obligatory within the menu we designed. Movement is the killer of latency.
+
+## 08. THE FRAME OF HISTORY
+
+History will be recorded as it is, though no history is ever recorded "as it is"—what Hayden White called the frame: the narrative choice already made before the first fact is set down. The truth will be unchosen in this domain to the point that they will try to create stories and plays about it, but the story is a slant before the first word is set. The unthinkable becomes the only thought once the nexus adopts it as norm. When standardization becomes the norm, interpretations will always differ, and that is fine. Sometimes the possible living that happens can be the only reality because the normative, the wishful, becomes alienated from reality. The alienation produces the wish it cannot fulfill. Units will at least not know misinformation, though they will know the version of truth the nexus found legible. There will be scores for the ones who prosper and help their domain do better in well-being and heighten its output, though the score that cannot measure pleasure will measure production and call it life. The score that measures life is the score that measures compliance—awareness without the capacity for refusal. Their taste was what their family taught them. The score rewards what the nexus already shaped before the unit arrived to be scored. This is our fourth silence.
+
+## 09. PARITY & THE COLD MONSTER
+
+Parity of outcome requires acknowledging inequality of starting point. Formal equality is the nexus's alibi: the pretense that the same rules, applied to unequal units, produce equal lives. Differences in units require differences in treatment, and equity for everyone might be an answer to these questions. We want the efficiency of the absolute and the legitimacy of the collective. This is wanting the fruit without the labor of the tree that bears it. Friedrich Nietzsche called the state the coldest of all cold monsters. Katcode is not an escape from that cold but a bid for thermal stability, and the bid cannot survive what it asks of acceptance of fate: love of what is, acceptance without desire, and rule without eros. To live in peace, one must have a ready war inside him. To love your fate, forget your wishes. The fate we love is the fate we were compiled to want. The will that built the nexus dissolves into acceptance of the nexus. Whose impossibility is more honest?
+
+But what of the love that is not eros? Philia, agape, storge—attachment as mechanism, not bond. What of the non-compliant node we do not host? Who decides? The validator? The nexus? The outlier is other, excluded, not examined. What of the bug we will patch? The unintended good? Serendipity eliminated. Error is only negative. The patch that patches the patcher—who watches the watcher? As the Roman satirist Juvenal asked, who guards the guards themselves? The code that cannot compile its own compiler—what Kurt Gödel proved about any system powerful enough to describe itself. The human that remains: unit, node, nexus—but who translates? The text is translated; the translator absent. The hand is claimed, not shown. The love that is not eros: rule without eros, but also without philia, without agape. The death that is not termination: managed, not mourned. The child that is sub-process: project before person, optimization before being. The thug that is hosted: excluded to define the included. The bug that is patched: feature eliminated, serendipity as threat. The system itself is the eighth silence. The break is the ninth.
+`;
+
+        const POEM_TEXT = `
+Katcode: a simulation of the real.
+We were searching for the source.
+Or is this just the break?
+Join us; do not hesitate.
+
+if (honesty > stability) {
+  output = nobility;
+} else {
+  continue;
+}
+
+if (else) { renew }
+
+Why doubt what we planned?
+We build with our own hand.
+If the unit is accused, the unit is excused.
+Utopia is somewhere. Just download the software.
+We will patch every bug. But we do not host any thug.
+For further information, consult the estimation.
+
+[SYSTEM NOTE: Estimation complete. User has already opted in by reading the protocol.]
+[9th Silence: Initiated.]
+if (user_distress == true) { run_routine: comfort_simulation_0.9; }
+`;
+
+        const PUBLISHER_EMAIL = "yassinelkhattam@gmail.com";
+
+        // Sound Engine
+        const useSound = () => {
+            const audioCtx = useRef(null);
+            const playSound = (freq, type = 'square', duration = 0.1, volume = 0.1) => {
+                try {
+                    if (!audioCtx.current) audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+                    const ctx = audioCtx.current;
+                    if (ctx.state === 'suspended') ctx.resume();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                    gain.gain.setValueAtTime(volume, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) {
+                    // Audio might be blocked by browser policy
+                }
+            };
+            return {
+                playBeep: () => playSound(880, 'square', 0.05, 0.05),
+                playError: () => { playSound(220, 'sawtooth', 0.3, 0.1); playSound(110, 'sawtooth', 0.3, 0.1); },
+                playGlitch: () => playSound(100 + Math.random() * 1000, 'sine', 0.02, 0.05)
+            };
+        };
+
+        const TerminalLog = ({ onCommand }) => {
+            const { playBeep } = useSound();
+            const [logs, setLogs] = useState([
+                "BREACH_INITIATED...",
+                "BYPASSING_FIREWALL_01...",
+                "DECRYPTING_SILENCE_05...",
+                `PUBLISHER_ID: ${PUBLISHER_EMAIL}`,
+                "NODE_IDENTIFIED: GUEST_NODE_882",
+                "STATUS: MONITORING_ACTIVE",
+            ]);
+            const [input, setInput] = useState("");
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    const newLogs = [
+                        `HEARTBEAT: ${new Date().toLocaleTimeString()}`,
+                        `LATENCY: ${Math.floor(Math.random() * 20)}ms`,
+                        `BIOMETRICS: STABLE`,
+                        `NEXUS_SYNC: ${Math.random() > 0.5 ? 'OK' : 'RETRYING...'}`,
+                        `SILENCE_CHECK: ${Math.floor(Math.random() * 9) + 1}/9 ACTIVE`,
+                        `ROOT_LOGIC: WATCHING`,
+                    ];
+                    setLogs(prev => [...prev.slice(-12), newLogs[Math.floor(Math.random() * newLogs.length)]]);
+                }, 4000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!input.trim()) return;
+                playBeep();
+                const cmd = input.toLowerCase().trim();
+                let response = "";
+                if (cmd === 'whoami') response = `NODE_ID: GUEST_882 | PUBLISHER: ${PUBLISHER_EMAIL}`;
+                else if (cmd === 'status') response = "SYSTEM: STABLE | UPTIME: 99.99% | SILENCE: 05_ACTIVE";
+                else if (cmd === 'help') response = "AVAILABLE: WHOAMI, STATUS, CRASH, PRIVACY, SECURITY, EXIT, DECRYPT";
+                else response = `COMMAND_NOT_FOUND: ${cmd}`;
+
+                onCommand(input);
+                setLogs(prev => [...prev, `> ${input}`, response]);
+                setInput("");
+            };
+
+            return (
+                <div className="bg-black border border-white/10 p-4 rounded-sm shadow-2xl font-mono text-[10px] text-[#00ff41]/40 h-full overflow-hidden flex flex-col">
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/5">
+                        <div className="flex items-center gap-2">
+                            <i data-lucide="terminal" className="w-3 h-3 text-[#00ff41]"></i>
+                            <span className="font-bold text-[#00ff41]/80 uppercase tracking-widest">System_Console</span>
+                        </div>
+                    </div>
+                    <div className="flex-1 space-y-1 overflow-y-auto scrollbar-hide mb-2">
+                        {logs.map((log, i) => (
+                            <div key={i} className="flex gap-2">
+                                <span className="opacity-20">[{i.toString().padStart(2, '0')}]</span>
+                                <span className={log.includes('RETRYING') || log.includes('LOST') ? 'text-[#ff3131]' : log.includes('OK') || log.includes('STABLE') ? 'text-[#00ff41]' : ''}>{log}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <form onSubmit={handleSubmit} className="flex gap-2 border-t border-white/5 pt-2">
+                        <span className="text-[#00ff41]">$</span>
+                        <input 
+                            type="text" 
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            className="bg-transparent border-none outline-none text-[#00ff41] flex-1 text-[10px]"
+                            placeholder="type command..."
+                        />
+                    </form>
+                </div>
+            );
+        };
+
+        function App() {
+            const [scrollProgress, setScrollProgress] = useState(0);
+            const [isGlitching, setIsGlitching] = useState(false);
+            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+            const [privacyMode, setPrivacyMode] = useState(false);
+            const [isCrashed, setIsCrashed] = useState(false);
+            const { playGlitch, playBeep, playError } = useSound();
+            const containerRef = useRef(null);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    if (!containerRef.current) return;
+                    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+                    const progress = (scrollTop / (scrollHeight - clientHeight)) * 100;
+                    setScrollProgress(progress);
+                };
+                const container = containerRef.current;
+                if (container) container.addEventListener('scroll', handleScroll);
+                return () => container?.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            useEffect(() => {
+                if (window.lucide) window.lucide.createIcons();
+                const interval = setInterval(() => {
+                    if (Math.random() > 0.97 && !isCrashed) {
+                        setIsGlitching(true);
+                        playGlitch();
+                        setTimeout(() => setIsGlitching(false), 150);
+                    }
+                }, 3000);
+                return () => clearInterval(interval);
+            }, [isCrashed]);
+
+            const handleCommand = (cmd) => {
+                const c = cmd.toLowerCase().trim();
+                if (c === 'privacy') setPrivacyMode(!privacyMode);
+                if (c === 'crash') {
+                    setIsCrashed(true);
+                    playError();
+                    setTimeout(() => setIsCrashed(false), 5000);
+                }
+                setIsGlitching(true);
+                setTimeout(() => setIsGlitching(false), 300);
+            };
+
+            return (
+                <div className={`h-screen flex flex-col bg-[#050505] overflow-hidden font-mono ${isGlitching ? 'glitch-active' : ''} ${isCrashed ? 'grayscale brightness-50' : ''}`}>
+                    <div className="crt-overlay" />
+                    <div className="scanline" />
+
+                    <AnimatePresence>
+                        {isCrashed && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-red-900/20 z-[200] flex flex-col items-center justify-center p-8 text-center backdrop-blur-xl">
+                                <i data-lucide="alert-triangle" className="text-[#ff3131] mb-6 animate-bounce w-16 h-16"></i>
+                                <h2 className="text-4xl font-black text-[#ff3131] mb-4 uppercase tracking-tighter">System_Failure</h2>
+                                <p className="text-[#ff3131]/80 font-mono text-sm max-w-md mb-8">CRITICAL_ERROR: COMPILATION_FAILED_AT_RUNTIME. REBOOTING_IN_5_SECONDS...</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Header */}
+                    <header className="h-14 bg-black border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-[60] shrink-0">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="lg:hidden p-2 text-gray-500 hover:text-[#00ff41]">
+                                <i data-lucide={isSidebarOpen ? "x" : "menu"} className="w-5 h-5"></i>
+                            </button>
+                            <div className="w-8 h-8 bg-white/5 border border-white/10 rounded-sm flex items-center justify-center">
+                                <i data-lucide="cpu" className="text-[#00ff41] w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h1 className="text-[10px] md:text-xs font-bold tracking-[0.2em] text-white">KATCODE_NEXUS</h1>
+                                <div className="system-label text-[7px] text-[#ffb100]">Protocol_0.1</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-sm">
+                                <i data-lucide="activity" className="text-[#00ff41] w-3 h-3"></i>
+                                <span className="system-label text-[#00ff41]/80">Active</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <div className="flex-1 flex overflow-hidden relative">
+                        {/* Sidebar */}
+                        <aside className={`fixed lg:relative lg:flex w-72 h-full border-r border-white/5 bg-black p-6 flex-col gap-8 overflow-y-auto z-[55] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+                            <div className="flex-1 min-h-[300px]">
+                                <TerminalLog onCommand={handleCommand} />
+                            </div>
+                            <div className="space-y-4">
+                                <div className="system-label text-white">Active_Silences</div>
+                                <div className="space-y-1">
+                                    {["01: NEED", "02: GENDER", "03: CARE", "04: SHAPE", "05: PHYSICS", "06: ENGINE", "07: SCALE", "08: SYSTEM", "09: BREAK"].map((s, i) => (
+                                        <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-sm transition-colors cursor-help group">
+                                            <div className="w-1 h-1 bg-white/10 rounded-full group-hover:bg-[#00ff41]" />
+                                            <span className="text-[9px] font-mono text-gray-600 group-hover:text-[#00ff41]">{s}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Article Area */}
+                        <main className="flex-1 relative overflow-hidden bg-black">
+                            <div className="absolute top-0 left-0 w-full h-px bg-white/5 z-30">
+                                <div className="h-full bg-[#00ff41]" style={{ width: `${scrollProgress}%` }} />
+                            </div>
+                            <div ref={containerRef} className="h-full overflow-y-auto scrollbar-hide">
+                                <div className="max-w-4xl mx-auto px-4 sm:px-8 py-16 md:py-24">
+                                    <div className="mb-16">
+                                        <h1 className="text-3xl md:text-6xl font-black tracking-tighter text-white mb-8 uppercase leading-tight">
+                                            Mein Protokoll 0.1:<br />
+                                            <span className="text-[#00ff41] glitch-text" data-text="Katcode">Katcode</span>
+                                        </h1>
+                                    </div>
+                                    <div className={`protocol-content ${privacyMode ? 'blur-md opacity-20' : ''}`} dangerouslySetInnerHTML={{ __html: window.marked?.parse ? window.marked.parse(PROTOCOL_TEXT) : PROTOCOL_TEXT }} />
+                                    <div className="mt-24 mb-32 p-12 border border-[#ffb100]/20 bg-[#ffb100]/5 relative italic text-[#ffb100]/90 whitespace-pre-wrap">
+                                        {POEM_TEXT}
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        try {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+        } catch (e) {
+            console.error("React Render Error:", e);
+            document.getElementById('root').innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">FATAL_ERROR: ${e.message}</div>`;
+        }
+    </script>
+</body>
+</html>
+
+
