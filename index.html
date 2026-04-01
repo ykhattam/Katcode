@@ -39,6 +39,8 @@
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <link rel="icon" href="data:,">
+
     <style type="text/css">
         body {
             background-color: #121212;
@@ -142,7 +144,16 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        const { motion, AnimatePresence } = FramerMotion;
+        
+        // Robust Framer Motion global detection
+        const MotionGlobal = window.Motion || window.framerMotion || window.FramerMotion || { 
+            motion: { 
+                div: ({children, ...props}) => <div {...props}>{children}</div>,
+                button: ({children, ...props}) => <button {...props}>{children}</button>
+            }, 
+            AnimatePresence: ({children}) => <>{children}</> 
+        };
+        const { motion, AnimatePresence } = MotionGlobal;
 
         // --- Icons ---
         const Icon = ({ name, className }) => {
