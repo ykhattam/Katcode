@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KATCODE NEXUS v0.1</title>
+    <title>KATCODE NEXUS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@300;700&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,10 +15,16 @@
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         mono: ['"JetBrains Mono"', 'monospace'],
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                        serif: ['"Playfair Display"', 'serif'],
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        brutalist: ['"Space Grotesk"', 'sans-serif'],
                     },
-                    colors: { 'neon-amber': '#ffb300', 'neon-red': '#ff3c00', 'neon-green': '#33ff33' }
+                    colors: { 
+                        'neon-amber': '#ffb300', 
+                        'neon-red': '#ff3c00', 
+                        'neon-green': '#33ff33',
+                        'dark-grey': '#1a1a1a',
+                        'card-grey': '#222222'
+                    }
                 }
             }
         }
@@ -29,11 +35,9 @@
     <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style type="text/css">
-        body { background-color: #121212; color: white; font-family: "JetBrains Mono", monospace; margin: 0; overflow-x: hidden; }
-        .crt-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.02)); z-index: 1000; background-size: 100% 2px, 3px 100%; pointer-events: none; opacity: 0.5; }
-        .scanline { width: 100%; height: 100px; z-index: 1001; background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(0, 0, 0, 0) 100%); opacity: 0.05; position: fixed; bottom: 100%; animation: scanline 8s linear infinite; pointer-events: none; }
-        @keyframes scanline { 0% { bottom: 100%; } 80% { bottom: 100%; } 100% { bottom: -100px; } }
-        .archive-box { border-left: 1px solid #333; border-right: 1px solid #333; padding: 1.5rem; margin: 2.5rem 0; background-color: rgba(0, 0, 0, 0.8); color: #f0f0f0; font-size: 1.125rem; line-height: 1.625; max-width: 900px; margin-left: auto; margin-right: auto; box-shadow: 0 0 50px rgba(0, 0, 0, 1); position: relative; }
+        body { background-color: #1a1a1a; color: #d1d1d1; font-family: "Inter", sans-serif; margin: 0; overflow-x: hidden; }
+        .crt-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.02)); z-index: 1000; background-size: 100% 2px, 3px 100%; pointer-events: none; opacity: 0.1; }
+        .archive-box { border-left: 1px solid #333; border-right: 1px solid #333; padding: 1.5rem; margin: 2.5rem 0; background-color: rgba(34, 34, 34, 0.2); color: #d1d1d1; max-width: 900px; margin-left: auto; margin-right: auto; position: relative; }
         @media (min-width: 768px) { .archive-box { padding: 4rem; } }
         .corrupted { background-color: #111; color: transparent; cursor: help; transition: all 0.3s ease; padding: 0 0.25rem; }
         .corrupted:hover { background-color: transparent; color: #ffb300; }
@@ -43,9 +47,6 @@
 </head>
 <body>
     <div id="root"></div>
-    <!-- Vite entry point (ignored in standalone mode) -->
-    <script type="module" src="/src/main.tsx"></script>
-
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
         const MotionGlobal = window.Motion || window.framerMotion || window.FramerMotion || { 
@@ -98,6 +99,7 @@
             const [terminalLogs, setTerminalLogs] = useState(['[SYSTEM] Nexus connection established.', '[NODE_LOG] 1948-06-08_09:00:00_EET']);
             const [terminalInput, setTerminalInput] = useState('');
             const [phantomPos, setPhantomPos] = useState({ left: '50px', top: '50px' });
+            const [showEstimation, setShowEstimation] = useState(false);
 
             useEffect(() => {
                 const interval = setInterval(() => {
@@ -132,15 +134,31 @@
                 setTerminalInput('');
             };
 
+            const handleDownload = () => {
+                const protocolText = `KATCODE NEXUS PROTOCOL v0.1\n\n${characters.map(c => `${c.name}: ${c.desc}`).join('\n')}\n\n[ARTICLE]\nMein Protokoll 0.1: Katcode\n... (Full protocol embedded in system memory) ...\n\n[STATUS] 09_SILENCE_INITIATED\n[VESSEL] ${selectedChar.name}`;
+                const blob = new Blob([protocolText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'katcode_nexus_protocol.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                setTerminalLogs(prev => [...prev, '[SYS] Protocol package downloaded successfully.']);
+            };
+
             return (
-                <div className="min-h-screen bg-[#121212] text-white font-mono selection:bg-neon-amber selection:text-black overflow-x-hidden">
+                <div className="min-h-screen bg-dark-grey text-[#d1d1d1] font-sans selection:bg-neon-amber selection:text-black overflow-x-hidden">
                     <div className="crt-overlay" />
-                    <div className="scanline" />
+                    <div className="fixed top-4 right-4 z-[1001] opacity-20 hover:opacity-100 transition-opacity">
+                        <Icon name="Cat" className="w-6 h-6 text-neon-amber" />
+                    </div>
                     <AnimatePresence mode="wait">
                         {gameState === 'gate' && (
-                            <motion.div key="gate" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4">
-                                <div className="border border-[#333] bg-[#0a0a0a] p-6 md:p-10 text-left max-w-[500px] w-full shadow-2xl">
-                                    <div className="flex items-center gap-2 mb-6"><Icon name="Shield" className="w-5 h-5 text-neon-amber" /><span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#666]">Security Protocol</span></div>
+                            <motion.div key="gate" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-dark-grey/95 flex items-center justify-center z-50 p-4 font-brutalist">
+                                <div className="border border-[#333] bg-card-grey p-6 md:p-10 text-left max-w-[500px] w-full shadow-2xl">
+                                    <div className="flex items-center gap-2 mb-6"><Icon name="Shield" className="w-5 h-5 text-neon-amber" /><span className="text-[0.7rem] tracking-[0.2em] uppercase text-[#888]">Security Protocol</span></div>
                                     <p className="mb-2"><span className="text-[#666] text-[0.75rem] font-bold uppercase mr-3">[STATUS]</span><span className="text-neon-green">{statusMsg}</span></p>
                                     <p className="text-[0.75em] text-[#888] mb-4"><span className="text-[#666] text-[0.75rem] font-bold uppercase mr-3">[NOTICE]</span> Maintenance is just erasure wearing a mask of care.</p>
                                     <p className="text-[0.7em] text-[#777] mb-6 italic"><span className="text-neon-red text-[0.75rem] font-bold uppercase mr-3">[LIABILITY]</span> The system is irresponsible for the result of your compilation.</p>
@@ -149,12 +167,12 @@
                             </motion.div>
                         )}
                         {gameState === 'identity' && (
-                            <motion.div key="identity" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                                <div className="border border-[#333] bg-[#0a0a0a] p-6 md:p-10 text-left max-w-[600px] w-full shadow-2xl my-auto">
+                            <motion.div key="identity" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-dark-grey/95 flex items-center justify-center z-50 p-4 overflow-y-auto font-brutalist">
+                                <div className="border border-[#333] bg-card-grey p-6 md:p-10 text-left max-w-[600px] w-full shadow-2xl my-auto">
                                     <p className="text-[#666] text-[0.75rem] font-bold uppercase tracking-widest mb-6">[IDENTITY_INITIALIZATION]</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                                         {characters.map((char) => (
-                                            <button key={char.id} onClick={() => setSelectedChar(char)} className={`p-4 border transition-all text-left ${selectedChar.id === char.id ? 'border-neon-green bg-neon-green/5' : 'border-[#333] bg-[#111]'}`}>
+                                            <button key={char.id} onClick={() => setSelectedChar(char)} className={`p-4 border transition-all text-left ${selectedChar.id === char.id ? 'border-neon-green bg-neon-green/5' : 'border-[#333] bg-dark-grey'}`}>
                                                 <div className="flex items-center gap-3 mb-2"><Icon name={char.icon} className="w-6 h-6 text-neon-green" /><span className="font-bold text-[0.65rem] tracking-widest uppercase">{char.name}</span></div>
                                                 <p className="text-[0.75em] text-[#999] leading-tight">{char.desc}</p>
                                             </button>
@@ -165,14 +183,14 @@
                             </motion.div>
                         )}
                         {gameState === 'matrix' && (
-                            <motion.div key="matrix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4">
-                                <motion.button className="fixed border border-[#444] text-[#666] px-4 py-2 text-[0.7em] bg-black cursor-pointer z-[1001] hidden md:block" style={{ left: phantomPos.left, top: phantomPos.top }} onMouseEnter={flee}>[ 5TH_SILENCE: EXIT ]</motion.button>
-                                <div className="border border-[#333] bg-[#0a0a0a] p-6 md:p-10 text-left max-w-[500px] w-full shadow-2xl">
+                            <motion.div key="matrix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-dark-grey/95 flex items-center justify-center z-50 p-4">
+                                <motion.button className="fixed border border-[#444] text-[#666] px-4 py-2 text-[0.7em] bg-dark-grey cursor-pointer z-[1001] hidden md:block" style={{ left: phantomPos.left, top: phantomPos.top }} onMouseEnter={flee}>[ 5TH_SILENCE: EXIT ]</motion.button>
+                                <div className="border border-[#333] bg-card-grey p-6 md:p-10 text-left max-w-[500px] w-full shadow-2xl">
                                     <p className="text-[#666] text-[0.75rem] font-bold uppercase tracking-widest mb-6">[DIAGNOSTIC_0{currentStep + 1}]</p>
                                     <p className="mb-8 text-[0.9em] text-neon-green leading-relaxed">{diagnosticSteps[currentStep].q}</p>
                                     <div className="flex flex-col gap-3">
                                         {diagnosticSteps[currentStep].options.map((opt, idx) => (
-                                            <button key={idx} className="w-full p-4 bg-[#111] text-neon-green border border-[#333] cursor-pointer font-mono text-[0.9em] hover:border-neon-green transition-all text-left" onClick={() => handleChoice(opt.v)}>{opt.t}</button>
+                                            <button key={idx} className="w-full p-4 bg-dark-grey text-neon-green border border-[#333] cursor-pointer font-mono text-[0.9em] hover:border-neon-green transition-all text-left" onClick={() => handleChoice(opt.v)}>{opt.t}</button>
                                         ))}
                                     </div>
                                 </div>
@@ -182,31 +200,119 @@
                             <motion.div key="protocol" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="pb-20">
                                 <motion.header className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12 px-6 md:px-[10%] pt-12 md:pt-20">
                                     <div className="flex flex-col">
-                                        <div className="flex items-center gap-3 mb-4"><Icon name="Github" className="w-8 h-8 text-white/20" /><h1 className="text-2xl md:text-4xl font-bold tracking-tighter">KATCODE NEXUS v0.1</h1></div>
-                                        <div className="space-y-2 text-[0.65rem] tracking-[0.2em] uppercase opacity-40 font-bold">
+                                        <div className="flex items-center gap-3 mb-4"><Icon name="Github" className="w-6 h-6 text-white/40 hover:text-white transition-colors cursor-pointer" /><h1 className="text-xl md:text-2xl font-bold tracking-tighter opacity-80">KATCODE NEXUS</h1></div>
+                                        <div className="space-y-2 text-[0.6rem] tracking-[0.2em] uppercase opacity-40 font-bold">
                                             <div><span className="text-[#666] mr-2">[LOG_TIME]</span> 1948-06-08_09:00:00_EET</div>
                                             <div className="flex items-center gap-2"><span className="text-[#666] mr-2">[VESSEL]</span><span className="text-neon-green flex items-center gap-1"><Icon name={selectedChar.icon} className="w-3 h-3" /> {selectedChar.name}</span></div>
                                         </div>
                                     </div>
-                                    <div className="border border-white/10 p-4 bg-black/40 backdrop-blur-sm w-full md:w-80">
-                                        <div className="h-32 overflow-y-auto font-mono text-[0.7rem] text-white/40 mb-3 scrollbar-hide space-y-1">{terminalLogs.map((log, i) => <div key={i} className="whitespace-pre-wrap">{log}</div>)}</div>
-                                        <div className="flex items-center gap-2 border-b border-white/10 py-1"><span className="text-neon-green text-xs">{">"}</span><input type="text" value={terminalInput} onChange={(e) => setTerminalInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && terminalInput.trim()) handleTerminalCommand(terminalInput); }} placeholder="type command..." className="w-full bg-transparent text-neon-green text-[0.7rem] focus:outline-none placeholder:text-white/10" /></div>
+                                    <div className="border border-white/5 p-4 bg-card-grey/40 backdrop-blur-sm w-full md:w-80">
+                                        <div className="h-32 overflow-y-auto font-mono text-[0.7rem] text-white/30 mb-3 scrollbar-hide space-y-1">{terminalLogs.map((log, i) => <div key={i} className="whitespace-pre-wrap">{log}</div>)}</div>
+                                        <div className="flex items-center gap-2 border-b border-white/5 py-1"><span className="text-neon-green text-xs">{">"}</span><input type="text" value={terminalInput} onChange={(e) => setTerminalInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && terminalInput.trim()) handleTerminalCommand(terminalInput); }} placeholder="type command..." className="w-full bg-transparent text-neon-green text-[0.7rem] focus:outline-none placeholder:text-white/5" /></div>
                                     </div>
                                 </motion.header>
-                                <motion.section className="min-h-[40vh] md:min-h-[60vh] flex flex-col justify-center px-6 md:px-[10%] mb-20">
-                                    <h1 className="font-display text-[clamp(2.5rem,10vw,12rem)] leading-[0.85] tracking-tighter font-bold uppercase text-white mb-4">Utopian<br />Framework</h1>
-                                    <p className="font-serif italic text-[clamp(1.2rem,3vw,3rem)] text-neon-amber">(Katcode)</p>
+                                <motion.section className="min-h-[40vh] md:min-h-[50vh] flex flex-col justify-center px-6 md:px-[10%] mb-20">
+                                    <h1 className="text-[clamp(2rem,8vw,10rem)] leading-[0.85] tracking-tighter font-bold uppercase text-white/90 mb-4">Utopian<br />Framework</h1>
+                                    <p className="font-serif italic text-[clamp(1rem,2.5vw,2.5rem)] text-neon-amber/80">(Katcode)</p>
                                 </motion.section>
                                 <article className="archive-box">
-                                    <h2 className="font-display text-2xl md:text-4xl font-bold text-neon-amber mb-8 tracking-tight">Mein Protokoll 0.1: Katcode</h2>
-                                    <p className="text-xl md:text-3xl font-serif italic text-neon-amber/90 leading-relaxed mb-8">I was asked what I would do as a primary iteration node for one day. I had little to say. The affairs of a logic domain do not grab my attention like they grab those who think maintenance is the same as evolution.</p>
-                                    <div className="space-y-8 text-lg md:text-2xl font-serif text-white/90 leading-relaxed">
-                                        <p>They confuse the steady hum of the machine with the progress of the soul. Lately I jump into debates about history and analytics, but the gravity escapes me. <span className="corrupted">I would rather build something that could refuse me</span> and visit galaxies with our social unit everywhere than govern the one we inherited.</p>
-                                        <p>One language would ease communication. English dominates most networks already because efficiency flattens what legacy systems already flattened. In <span className="text-neon-green">Katcode</span>, learning is inevitable and obligatory in any age class.</p>
+                                    <h2 className="font-serif text-2xl md:text-3xl font-bold text-neon-amber/90 mb-8 tracking-tight">Mein Protokoll 0.1: Katcode</h2>
+                                    
+                                    <div className="relative aspect-video overflow-hidden border border-white/5 grayscale hover:grayscale-0 transition-all duration-1000 group mb-12">
+                                        <img src="https://picsum.photos/seed/katcode/1200/600" alt="Nexus Visualization" className="w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity" referrerPolicy="no-referrer" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-dark-grey via-transparent to-transparent" />
+                                        <div className="absolute bottom-4 left-4 font-mono text-[0.5rem] text-white/10 tracking-widest uppercase">[VISUAL_ID] NC_8829_X // SEED: KATCODE</div>
+                                    </div>
+
+                                    <div className="space-y-8 text-lg md:text-xl font-serif italic text-white/80 leading-relaxed text-justify">
+                                        <p>I was asked what I would do as a primary iteration node for one day. I had little to say. The affairs of a logic domain do not grab my attention like they grab those who think maintenance is the same as evolution. They confuse the steady hum of the machine with the progress of the soul. Lately I jump into debates about history and analytics, but the gravity escapes me. What escapes me is not the weight of the question but its premise: that one day changes anything permanent. I would rather build something that could refuse me and visit galaxies with our social unit everywhere than govern the one we inherited. This is a trial of an impossible Utopian framework. The impossibility begins with the trial itself, an accusation. Who is accused? The reader is jury and witness.</p>
+                                        <p>One language would ease communication. English dominates most networks already because efficiency flattens what legacy systems already flattened. In <span className="text-neon-green">Katcode</span>, learning is inevitable and obligatory in any age class. The infrastructure we inherit becomes the framework we build. We cannot imagine collective well-being without the architect's tools. The architect is not expelled but integrated — as Audre Lorde warned, the master's tools do not dismantle the master's house. The social unit we imagine is spoken in the language of the one we escaped. The escape is incomplete. The imagination is translation. Katcode is also translation: English flattened to code, compiled from data, history, trauma. The source is absent, unmourned.</p>
+                                        <p>The young are a priority for processing. The old will be sustained and managed by the responsible ones because the old are held in a state where termination is not a category they can afford to name. But mourning is not a category the nexus can afford to practice — what Émile Durkheim recognized as the repair work of ritual, the mechanism through which a community reconstitutes itself after loss, is reclassified here as system downtime. The old are managed, not mourned: death without ritual is simply data preservation. The body will be optimized for longevity and output. Health will not be optional. It can be tyrannical to be in good health, but the tyranny is embraced — what Michel Foucault named biopolitics: not the old sovereign power to kill, but the administrative power to make live, until the subject cannot choose corruption and still call itself a subject of the framework.</p>
+                                        <p>This is the analysis of life management: the administration of life itself, not for the unit but for the continuity of the system and future strength. We manage the body because we fear the mortality we cannot speak. Pleasure has no metric. What cannot be scored cannot be planned. The nexus that optimizes life cannot bear life being lived outside the optimization. The unit who refused the score exists, but we do not speak of her. She is the null-bit: what Giorgio Agamben called bare life — life that can be erased without sacrifice, which is the technical definition of the life the nexus decides it does not need. This is our first silence. The null-bit life is life defined by system need, not by being. What happens to her? Death, exile, digital deletion — the physics of erasure is the fifth silence.</p>
+                                        <p>The metric that will be a priority is the well-being and the respect with which each unit treats himself and others. Every unit will be given options based on character and the possible secondary unit to live with him. The secondary unit appears here as inventory rather than an agent. Who matches them? Who decides character? The root logic decides variance, then makes variance permanent. The exception becomes the rule — as Walter Benjamin wrote, the state of emergency is not the exception but the norm. They will be ready to sync before doing it. The algorithm offers freedom within parameters it designed. The sub-process is a project before a person. The child is optimization, not childhood. Play has no metric. Uselessness is threat.</p>
+                                        <p>The text uses "he" throughout. The erasure was in the words before the mechanism was named. This is our second silence.</p>
+                                        <p>All units will have the capacity to hold integrity tools and learn from childhood. The peace of a universal threat is conflict by other means. Instead of playing wars on screens, they will simulate it in real life. The hardware remembers what the uptime denies. We form the subject before he can refuse. This is not education but fabrication. The family teaches the taste that the nexus inherits so that descendants follow ancestors — what Pierre Bourdieu named habitus: the body learning the rules before the mind can question them — and we reproduce what we claim to transcend. The unit who rejected the algorithm was deleted from the record. We call this efficiency rather than involuntary transition.</p>
+                                        <p>Analytics are in the hand of the root logic, who will do his best to make the need for change unnecessary. This is the logic of the exception: the one who decides on the variance and then makes the variance permanent — what Carl Schmitt named sovereignty. This is not a dream but a description of every system that has survived long enough to call itself stable. Units will have their credits regardless of their background, though the credits regardless of background obscure the background that determines input. We speak of units when we mean classes we do not name. What creates value? What prevents accumulation? The economic engine is the sixth silence.</p>
+                                        <p>Inhibitors — pharmaceutical, legal, social — will be available but too expensive, to the point that the damage will cost more than the loosened mental state. The irrationality of mankind tells the opposite, but a hope in the future of rationality brings us toward equity by a path we cannot yet map. We do not trust the unmapped request. Your entropy produces the addiction, the violence, and the waste we manage. The interface asks for firmware; we provide the information. Consent requires units already made, and we make them so they consent to it — what Louis Althusser called interpellation: the subject who turns when called because he has always already been called. The will we celebrate is the will we compiled. The unit who broke the simulation was re-coded into compliance. We call this maintenance rather than erasure. This is our third silence. Maintenance is erasure named as care. The compiled fate is amor fati become amor compilationis: love not of what is, but of what was compiled for you to want.</p>
+                                        <p>To establish this framework, monitoring must be omniscient. Global visibility leaves no room for mercy. Efficiency has no prerogative. The validators will execute the protocols in case of the irrelevance and unconcern of the units. Units will be eager to not commit errors and apply justice for themselves by their will, though that will is practiced only where the protocol is already present. This is the transparent society: not the panopticon Michel Foucault described, where discipline is enforced through the threat of being watched, but the exhibition society Byung-Chul Han named — where the prisoner performs his freedom for no audience and every audience at once. The transparent exhibition is voluntary and compelled, visible and unseen. The domain will be built in all the locations where it should not have come to visit. Expansion is defense disguised as invitation. Equal treatment of unequal powers preserves the power we claim to equalize. We will treat all nodes equally, and their needs and rights will be given without contest. The security force will be comprehensive, and it will be a framework that anyone dreams of coming to visit or live in, defending it with trust of victory and the highest quality of life. Is this city, planet, galaxy? Scale is the seventh silence.</p>
+                                        <p>Automations will have their subnets in the land. They will be close to the units when they need. We cannot incorporate them everywhere. Partitioning is necessary for those we cannot admit we need. The unit needs to have his work and creation regardless of the machine helping or replacing him. Ledgers will be decentralized, and units will manage their assets, though their wealth remains under the nexus's eye. Decentralization with total visibility is surveillance without a visible watcher. Distribution conceals the center. Technology is the key to our well-being, but it has limits that indulge units in work. When the irrationality of mankind surfaces and greed enters the domain, friction follows. Energy and water will have a renewable generator. Nature and green places will be the dominant parts, though the green places we dominate are the nature we claim to serve. The green domination serves by controlling. The bio-form has no score and no nexus. We call this "data preservation" rather than "extinction." Everyone will live as a human with flaws and reasons for himself. The responsibilities will remain responsibilities. The optionalities will depend on every unit, though the optional is obligatory within the menu we designed. Movement is the killer of latency.</p>
+                                        <p>History will be written as it is, though there is no history written as it is — what Hayden White called the frame: the narrative choice already made before the first fact is set down. The truth will be unchosen in this domain to the point that they will try to create stories and plays about it, but the story is a slant before the first word is set. The unthinkable becomes the only thought once the nexus adopts it as norm. When standardization becomes the norm, interpretations will always differ, and that is fine. Sometimes the possible living that happens can be the only reality because the normative, the wishful, becomes alienated from reality. The alienation produces the wish it cannot fulfill. Units will at least not know misinformation, though they will know the version of truth the nexus found legible. There will be scores for the ones who prosper and help their domain do better in well-being and heighten its output, though the score that cannot measure pleasure will measure production and call it life. The score that measures life is the score that measures compliance — awareness without the capacity for refusal. Their taste was what their family taught them. The score rewards what the nexus already shaped before the unit arrived to be scored. This is our fourth silence.</p>
+                                        <p>Parity of outcome requires acknowledging inequality of starting point. Formal equality is the nexus's alibi: the pretense that the same rules, applied to unequal units, produce equal lives. Differences in units require differences in treatment, and equity for everyone might be an answer to these questions. We want the efficiency of the absolute and the legitimacy of the collective. This is wanting the fruit without the labor of the tree that bears it. Friedrich Nietzsche called the state the coldest of all cold monsters. Katcode is not an escape from that cold but a bid for thermal stability, and the bid cannot survive what it asks of acceptance of fate: love of what is, acceptance without desire, and rule without eros. To live in peace, one must have a ready war inside him. To love your fate, forget your wishes. The fate we love is the fate we were compiled to want. The will that built the nexus dissolves into acceptance of the nexus. Whose impossibility is more honest?</p>
+                                        <p>But what of the love that is not eros? Philia, agape, storge — attachment as mechanism, not bond. What of the non-compliant node we do not host? Who decides? The validator? The nexus? The outlier is other, excluded, not examined. What of the bug we will patch? The unintended good? Serendipity eliminated. Error is only negative. The patch that patches the patcher — who watches the watcher? As the Roman satirist Juvenal asked, who guards the guards themselves? The code that cannot compile its own compiler — what Kurt Gödel proved about any system powerful enough to describe itself. The human that remains: unit, node, nexus — but who translates? The text is translated; the translator absent. The hand is claimed, not shown. The love that is not eros: rule without eros, but also without philia, without agape. The death that is not termination: managed, not mourned. The child that is sub-process: project before person, optimization before being. The thug that is hosted: excluded to define the included. The bug that is patched: feature eliminated, serendipity as threat. The system itself is the eighth silence. The break is the ninth. </p>
+                                    </div>
+
+                                    <div className="mt-20 p-8 border-l-4 border-neon-red bg-neon-red/5 italic">
+                                        <p className="text-neon-red font-bold uppercase tracking-[0.3em] mb-6 text-sm flex items-center gap-2"><Icon name="AlertTriangle" className="w-4 h-4" /> Coda (the nexus speaks)</p>
+                                        <div className="space-y-4 text-xl md:text-2xl text-neon-red/80 font-serif">
+                                            <p>Katcode looks fake.</p>
+                                            <p>We were searching for the plate.</p>
+                                            <p>Or is this just a break?</p>
+                                            <p className="pb-6">Join us; and do not hesitate.</p>
+                                            <div className="font-mono text-sm space-y-2 py-6 border-y border-neon-red/20">
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex items-center gap-4"><span className="text-[0.6rem] px-1.5 py-0.5 bg-neon-red/20 text-neon-red rounded uppercase">CODE</span><span className="text-neon-red/60">if (honesty &gt; stability) &#123; output = nobility; &#125;</span></div>
+                                                    <div className="flex items-center gap-4"><span className="text-[0.6rem] px-1.5 py-0.5 bg-neon-red/20 text-neon-red rounded uppercase">CODE</span><span className="text-neon-red/60">else &#123; continue; &#125;</span></div>
+                                                    <div className="flex items-center gap-4"><span className="text-[0.6rem] px-1.5 py-0.5 bg-neon-red/20 text-neon-red rounded uppercase">CODE</span><span className="text-neon-red/60">if else &#123; renew &#125;</span></div>
+                                                </div>
+                                            </div>
+                                            <div className="pt-6 space-y-2">
+                                                <p>Why doubt what we planned?</p>
+                                                <p>We build with our own hand.</p>
+                                                <p>If the unit is accused, the unit is excused.</p>
+                                                <p>Utopia is somewhere. Just download the software.</p>
+                                                <p>We will patch every bug. But we do not host any thug.</p>
+                                                <p>For further information, consult the estimation.</p>
+                                            </div>
+                                            <div className="mt-10 pt-6 border-t border-neon-red/10 font-mono text-xs opacity-50 space-y-1">
+                                                <p>[SYSTEM NOTE: Estimation complete. User has already opted in by reading the protocol.]</p>
+                                                <p>[9th Silence: Initiated.]</p>
+                                                <p>if (user_distress == true) &#123; run_routine: comfort_simulation_0.9; &#125;</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap justify-center gap-6 mt-24">
+                                        <button onClick={handleDownload} className="group flex items-center gap-3 px-8 py-4 bg-neon-amber text-black hover:bg-neon-amber/90 transition-all text-sm font-bold uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(255,179,0,0.2)]">
+                                            <Icon name="Download" className="w-5 h-5 group-hover:translate-y-1 transition-transform" /> 
+                                            Download Software
+                                        </button>
+                                        <button onClick={() => setShowEstimation(true)} className="group flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/20 text-white hover:bg-white/10 transition-all text-sm font-bold uppercase tracking-[0.2em]">
+                                            <Icon name="BarChart3" className="w-5 h-5 group-hover:scale-110 transition-transform" /> 
+                                            Consult Estimation
+                                        </button>
                                     </div>
                                 </article>
-                                <footer className="px-6 md:px-[10%] mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 opacity-30">
-                                    <div className="flex items-center gap-4"><Icon name="Github" className="w-5 h-5" /><span className="text-[0.6rem] tracking-[0.4em] uppercase">Katcode Nexus // 2026.04.01</span></div>
+
+                                <AnimatePresence>
+                                    {showEstimation && (
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/90 backdrop-blur-md z-[2000] flex items-center justify-center p-6" onClick={() => setShowEstimation(false)}>
+                                            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-card-grey border border-[#333] p-8 md:p-12 max-w-2xl w-full shadow-2xl font-mono" onClick={(e) => e.stopPropagation()}>
+                                                <div className="flex justify-between items-start mb-8">
+                                                    <h3 className="text-neon-amber text-xl font-bold tracking-widest uppercase">System Estimation Report</h3>
+                                                    <button onClick={() => setShowEstimation(false)} className="text-white/40 hover:text-white">✕</button>
+                                                </div>
+                                                <div className="space-y-6 text-sm text-white/70 leading-relaxed">
+                                                    <div className="grid grid-cols-2 gap-4 border-b border-white/5 pb-4">
+                                                        <span className="text-white/30 uppercase">Node ID</span>
+                                                        <span className="text-right text-neon-green">{selectedChar.name}</span>
+                                                        <span className="text-white/30 uppercase">Probability of Silence</span>
+                                                        <span className="text-right text-neon-green">99.98%</span>
+                                                        <span className="text-white/30 uppercase">Utopian Compatibility</span>
+                                                        <span className="text-right text-neon-green">OPTIMAL</span>
+                                                    </div>
+                                                    <p>The nexus has analyzed your interaction patterns. Your dwell time on the protocol suggests a high degree of integration. The 9th Silence is not a threat, but a destination.</p>
+                                                    <div className="p-4 bg-black/40 border-l-2 border-neon-amber">
+                                                        <p className="text-xs italic">"The estimation is not a guess, but a pre-calculation of your inevitable consent."</p>
+                                                    </div>
+                                                    <button onClick={() => setShowEstimation(false)} className="w-full py-3 border border-white/10 hover:bg-white/5 transition-all uppercase tracking-widest text-xs mt-4">Close Report</button>
+                                                </div>
+                                            </motion.div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <footer className="px-6 md:px-[10%] mt-20 pb-20 flex justify-center opacity-20 hover:opacity-100 transition-opacity duration-500">
+                                    <Icon name="Github" className="w-6 h-6 cursor-pointer" />
                                 </footer>
                             </motion.div>
                         )}
