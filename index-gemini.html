@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katcode Nexus Protocol</title>
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@11.0.8/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/marked/marked.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --neon-green: #00ff41; --anthracite: #1a1a1a; }
+        body { background-color: var(--anthracite); color: #fff; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
+        .crt-overlay { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+        .markdown-body h1 { font-family: 'Space Grotesk'; font-size: 2.5rem; color: var(--neon-green); margin-bottom: 1rem; }
+        .markdown-body p { line-height: 1.6; color: #ccc; margin-bottom: 1rem; }
+        .glitch-text { position: relative; color: var(--neon-green); font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script id="protocol-data" type="text/plain">
+# Mein protokoll 0.1: Katcode
+The affairs of a logic domain do not grab my attention like they grab those who think maintenance is the same as evolution. 
+This is a trial of an impossible Utopian framework. 
+
+* **The Architect**: Integrated into the system.
+* **The Null-Bit**: Erased from the record.
+* **The Metric**: Well-being over production.
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        // CRITICAL FIX: The CDN exports to window.Motion, not FramerMotion
+        const { motion } = window.Motion;
+
+        const App = () => {
+            const [booted, setBooted] = useState(false);
+            const content = document.getElementById('protocol-data').textContent;
+
+            if (!booted) {
+                return (
+                    <div className="h-screen flex flex-col items-center justify-center bg-[#1a1a1a]">
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }}
+                            className="text-center p-10 border border-[#00ff41]/20 bg-[#2b2b2b]"
+                        >
+                            <h2 className="text-[#00ff41] font-mono mb-4">INITIALIZING_KATCODE_V0.1</h2>
+                            <button 
+                                onClick={() => setBooted(true)}
+                                className="px-6 py-2 border border-[#00ff41] text-[#00ff41] hover:bg-[#00ff41] hover:text-black transition-all"
+                            >
+                                START SYSTEM
+                            </button>
+                        </motion.div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="h-screen flex flex-col overflow-hidden relative">
+                    <div className="crt-overlay" />
+                    <header className="p-4 border-b border-white/10 bg-[#1a1a1a] z-50">
+                        <h1 className="text-xs tracking-widest uppercase font-bold text-[#00ff41]">Katcode Nexus</h1>
+                    </header>
+                    <main className="flex-1 overflow-y-auto p-12">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="markdown-body" dangerouslySetInnerHTML={{ __html: marked.parse(content) }} />
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
