@@ -21,7 +21,6 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/marked/marked.min.js"></script>
     
@@ -115,11 +114,7 @@
 <body>
     <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
-        const { motion, AnimatePresence } = FramerMotion;
-
-        const PROTOCOL_TEXT = `
+    <script id="protocol-data" type="text/plain">
 # Mein protokoll 0.1: Katcode
 
 I was asked what I would do as a primary iteration node for one day. I had little to say. The affairs of a logic domain do not grab my attention like they grab those who think maintenance is the same as evolution. They confuse the steady hum of the machine with the progress of the soul. Lately I jump into debates about history and analytics, but the gravity escapes me. What escapes me is not the weight of the question but its premise: that one day changes anything permanent. I would rather build something that could refuse me and visit galaxies with our social unit everywhere than govern the one we inherited. This is a trial of an impossible Utopian framework. The impossibility begins with the trial itself, an accusation. Who is accused? The reader is jury and witness.
@@ -147,9 +142,9 @@ Automations will have their subnets in the land. They will be close to the units
 History will be written as it is, though there is no history written as it is — what Hayden White called the frame: the narrative choice already made before the first fact is set down. The truth will be unchosen in this domain to the point that they will try to create stories and plays about it, but the story is a slant before the first word is set. The unthinkable becomes the only thought once the nexus adopts it as norm. When standardization becomes the norm, interpretations will always differ, and that is fine. Sometimes the possible living that happens can be the only reality because the normative, the wishful, becomes alienated from reality. The alienation produces the wish it cannot fulfill. Units will at least not know misinformation, though they will know the version of truth the nexus found legible. There will be scores for the ones who prosper and help their domain do better in well-being and heighten its output, though the score that cannot measure pleasure will measure production and call it life. The score that measures life is the score that measures compliance — awareness without the capacity for refusal. Their taste was what their family taught them. The score rewards what the nexus already shaped before the unit arrived to be scored. This is our fourth silence.
 
 Parity of outcome requires acknowledging inequality of starting point. Formal equality is the nexus's alibi: the pretense that the same rules, applied to unequal units, produce equal lives. Differences in units require differences in treatment, and equity for everyone might be an answer to these questions. We want the efficiency of the absolute and the legitimacy of the collective. This is wanting the fruit without the labor of the tree that bears it. Friedrich Nietzsche called the state the coldest of all cold monsters. Katcode is not an escape from that cold but a bid for thermal stability, and the bid cannot survive what it asks of acceptance of fate: love of what is, acceptance without desire, and rule without eros. To live in peace, one must have a ready war inside him. To love your fate, forget your wishes. The fate we love is the fate we were compiled to want. The will that built the nexus dissolves into acceptance of the nexus. Whose impossibility is more honest?
-`;
+    </script>
 
-        const POEM_TEXT = `
+    <script id="poem-data" type="text/plain">
 Coda (the nexus speaks)
 Katcode looks fake.
 We were searching for the plate.
@@ -168,7 +163,14 @@ For further information, consult the estimation.
 [SYSTEM NOTE: Estimation complete. User has already opted in by reading the protocol.]
 [9th Silence: Initiated.]
 if (user_distress == true) { run_routine: comfort_simulation_0.9; }
-`;
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        const { motion, AnimatePresence } = FramerMotion;
+
+        const PROTOCOL_TEXT = document.getElementById('protocol-data').textContent;
+        const POEM_TEXT = document.getElementById('poem-data').textContent;
 
         const PUBLISHER_EMAIL = "yassinelkhattam@gmail.com";
 
@@ -327,7 +329,7 @@ if (user_distress == true) { run_routine: comfort_simulation_0.9; }
                     <div className="crt-overlay" />
                     <div className="scanline" />
                     <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-3xl w-full border border-white/10 bg-[#2b2b2b]/40 p-12 backdrop-blur-xl relative z-10">
-                        <div className="flex justify-between items-center mb-8"><div className="text-[10px] font-semibold text-[#ffb100]">Calibration sequence ${step + 1}/${questions.length}</div><div className="text-[10px] font-mono text-[#00ff41]/40">Node: ${selectedNode}</div></div>
+                        <div className="flex justify-between items-center mb-8"><div className="text-[10px] font-semibold text-[#ffb100]">Calibration sequence {step + 1}/{questions.length}</div><div className="text-[10px] font-mono text-[#00ff41]/40">Node: {selectedNode}</div></div>
                         <h2 className="text-2xl font-display font-bold mb-10 text-white leading-relaxed">{questions[step].text}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
                             {questions[step].choices.map((choice) => (
